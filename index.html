@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Portal - Role Selection</title>
+    <link rel="stylesheet" href="RoleSelection.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Student Attendance & Result Portal</h1>
+            <p>Select your role to continue</p>
+        </div>
+
+        <div class="role-cards">
+            <div class="role-card" data-role="admin">
+                <div class="card-icon">👨‍💼</div>
+                <h3>Admin</h3>
+                <p>Manage users, courses, and system settings</p>
+                <button class="login-btn" onclick="redirectToLogin('admin')">Login as Admin</button>
+            </div>
+
+            <div class="role-card" data-role="teacher">
+                <div class="card-icon">👩‍🏫</div>
+                <h3>Teacher</h3>
+                <p>Mark attendance and upload student results</p>
+                <button class="login-btn" onclick="redirectToLogin('teacher')">Login as Teacher</button>
+            </div>
+
+            <div class="role-card" data-role="student">
+                <div class="card-icon">🎓</div>
+                <h3>Student</h3>
+                <p>View attendance records and exam results</p>
+                <button class="login-btn" onclick="redirectToLogin('student')">Login as Student</button>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>&copy; 2025 Student Portal. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script src="RoleSelection.js"></script>
+</body>
+
+</html>
