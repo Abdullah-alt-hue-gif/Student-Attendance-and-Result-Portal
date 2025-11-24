@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal - Settings</title>
+    <link rel="stylesheet" href="admin-styles.css">
+</head>
+
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>Admin Portal</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a href="admin-dashboard.html">📊 Dashboard</a></li>
+                <li class="menu-item"><a href="admin-users.html">👥 Manage Users</a></li>
+                <li class="menu-item"><a href="admin-courses.html">📚 Manage Courses</a></li>
+                <li class="menu-item"><a href="admin-reports.html">📈 Reports</a></li>
+                <li class="menu-item active"><a href="admin-settings.html">⚙️ Settings</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="content-header">
+                <h1>Settings</h1>
+                <div class="user-info">
+                    <span>🔔</span>
+                    <button class="logout-btn-simple" onclick="logout()">
+                        ↪️ Logout
+                    </button>
+                </div>
+            </header>
+
+            <!-- Settings Sections -->
+            <div class="settings-container">
+                <!-- Profile Settings -->
+                <div class="settings-card-white">
+                    <h3>Profile Settings</h3>
+                    <div class="form-row">
+                        <div class="form-group-half">
+                            <label for="firstName">First Name</label>
+                            <input type="text" id="firstName" value="Admin" placeholder="First Name">
+                        </div>
+                        <div class="form-group-half">
+                            <label for="lastName">Last Name</label>
+                            <input type="text" id="lastName" value="User" placeholder="Last Name">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="emailAddress">Email Address</label>
+                        <input type="email" id="emailAddress" value="admin@portal.com" placeholder="Email Address">
+                    </div>
+                    <div class="form-group">
+                        <label for="phoneNumber">Phone Number</label>
+                        <input type="tel" id="phoneNumber" value="+1 (555) 123-4567" placeholder="Phone Number">
+                    </div>
+                    <button class="save-changes-btn" onclick="saveProfileSettings()">
+                        💾 Save Changes
+                    </button>
+                </div>
+
+                <!-- Change Password -->
+                <div class="settings-card-white">
+                    <h3>Change Password</h3>
+                    <div class="form-group">
+                        <label for="currentPassword">Current Password</label>
+                        <input type="password" id="currentPassword" placeholder="Enter current password">
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">New Password</label>
+                        <input type="password" id="newPassword" placeholder="Enter new password">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm New Password</label>
+                        <input type="password" id="confirmPassword" placeholder="Confirm new password">
+                    </div>
+                    <button class="save-changes-btn" onclick="updatePassword()">
+                        💾 Update Password
+                    </button>
+                </div>
+
+                <!-- System Settings -->
+                <div class="settings-card-white">
+                    <h3>System Settings</h3>
+                    <div class="form-group">
+                        <label for="academicYear">Academic Year</label>
+                        <select id="academicYear">
+                            <option value="2024-2025">2024-2025</option>
+                            <option value="2025-2026" selected>2025-2026</option>
+                            <option value="2026-2027">2026-2027</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="semester">Semester</label>
+                        <select id="semester">
+                            <option value="Spring 2025">Spring 2025</option>
+                            <option value="Fall 2025" selected>Fall 2025</option>
+                            <option value="Winter 2026">Winter 2026</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="attendanceThreshold">Minimum Attendance Threshold (%)</label>
+                        <input type="number" id="attendanceThreshold" value="75" min="0" max="100">
+                    </div>
+                    <button class="save-changes-btn" onclick="saveSystemSettings()">
+                        💾 Save Settings
+                    </button>
+                </div>
+
+                <!-- Notification Preferences -->
+                <div class="settings-card-white">
+                    <h3>Notification Preferences</h3>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="lowAttendanceAlerts" checked>
+                            <div class="checkbox-text">
+                                <strong>Email notifications for low attendance alerts</strong>
+                                <small>Receive emails when student attendance falls below threshold</small>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="newUserNotifications" checked>
+                            <div class="checkbox-text">
+                                <strong>New user registration notifications</strong>
+                                <small>Get notified when new users join the system</small>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="weeklySummary">
+                            <div class="checkbox-text">
+                                <strong>Weekly summary reports</strong>
+                                <small>Receive weekly attendance and performance summaries</small>
+                            </div>
+                        </label>
+                    </div>
+                    <button class="save-changes-btn" onclick="saveNotificationPreferences()">
+                        💾 Save Preferences
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="admin-settings-script.js"></script>
+</body>
+
+</html>

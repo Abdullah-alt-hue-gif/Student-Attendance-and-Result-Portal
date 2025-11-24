@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal - Dashboard</title>
+    <link rel="stylesheet" href="admin-styles.css">
+</head>
+
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>Admin Portal</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item active"><a href="admin-dashboard.html">📊 Dashboard</a></li>
+                <li class="menu-item"><a href="admin-users.html">👥 Manage Users</a></li>
+                <li class="menu-item"><a href="admin-courses.html">📚 Manage Courses</a></li>
+                <li class="menu-item"><a href="admin-reports.html">📈 Reports</a></li>
+                <li class="menu-item"><a href="admin-settings.html">⚙️ Settings</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="content-header">
+                <h1>Admin Dashboard</h1>
+                <div class="user-info">
+                    <span id="adminUserName">Admin User</span>
+                    <div class="user-avatar">A</div>
+                </div>
+            </header>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🎓</div>
+                    <div class="stat-info">
+                        <h3 id="totalStudents">0</h3>
+                        <p>Total Students</p>
+                        <span class="stat-trend positive" id="studentTrend">Loading...</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">👩‍🏫</div>
+                    <div class="stat-info">
+                        <h3 id="totalTeachers">0</h3>
+                        <p>Total Teachers</p>
+                        <span class="stat-trend positive" id="teacherTrend">Loading...</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📚</div>
+                    <div class="stat-info">
+                        <h3 id="totalCourses">0</h3>
+                        <p>Active Courses</p>
+                        <span class="stat-trend" id="courseTrend">Loading...</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-info">
+                        <h3 id="attendanceAlerts">0</h3>
+                        <p>Attendance Alerts</p>
+                        <span class="stat-trend negative" id="alertTrend">Requires attention</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Grid -->
+            <div class="content-grid">
+                <!-- Left Column -->
+                <div class="content-column">
+                    <!-- Attendance Trends Chart -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Attendance Trends</h3>
+                            <select id="timeRange" onchange="updateAttendanceChart()">
+                                <option value="week">Last Week</option>
+                                <option value="month" selected>Last Month</option>
+                                <option value="quarter">Last Quarter</option>
+                            </select>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="attendanceChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- System Overview -->
+                    <div class="system-card">
+                        <h3>System Overview</h3>
+                        <div class="system-stats">
+                            <div class="system-stat">
+                                <span class="stat-label">Storage Used</span>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="storageProgress" style="width: 0%"></div>
+                                </div>
+                                <span class="stat-value" id="storageValue">0%</span>
+                            </div>
+                            <div class="system-stat">
+                                <span class="stat-label">Active Sessions</span>
+                                <span class="stat-value" id="activeSessions">0</span>
+                            </div>
+                            <div class="system-stat">
+                                <span class="stat-label">Server Uptime</span>
+                                <span class="stat-value" id="serverUptime">0 days</span>
+                            </div>
+                            <div class="system-stat">
+                                <span class="stat-label">Reports Generated</span>
+                                <span class="stat-value" id="reportsGenerated">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="content-column">
+                    <!-- Quick Actions -->
+                    <div class="actions-card">
+                        <h3>Quick Actions</h3>
+                        <div class="action-buttons">
+                            <button class="action-btn" onclick="addNewUser()">
+                                <span>➕</span>
+                                Add New User
+                            </button>
+                            <button class="action-btn" onclick="createCourse()">
+                                <span>📚</span>
+                                Create Course
+                            </button>
+                            <button class="action-btn" onclick="generateReport()">
+                                <span>📈</span>
+                                Generate Report
+                            </button>
+                            <button class="action-btn" onclick="viewSystemLogs()">
+                                <span>📋</span>
+                                System Logs
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Attendance Alerts -->
+                    <div class="alerts-card">
+                        <div class="card-header">
+                            <h3>Attendance Alerts</h3>
+                            <button class="reset-btn" onclick="resetAlerts()">Reset Alerts</button>
+                        </div>
+                        <div class="alerts-list" id="alertsList">
+                            <!-- Alerts will be dynamically loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="activity-card">
+                        <h3>Recent Activity</h3>
+                        <div class="activity-list" id="activityList">
+                            <!-- Activities will be dynamically loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- System Logs Modal -->
+    <div id="systemLogsModal" class="modal">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h3>System Logs</h3>
+                <span class="close" onclick="closeSystemLogs()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="logs-controls">
+                    <button class="refresh-btn" onclick="refreshLogs()">🔄 Refresh</button>
+                    <button class="clear-btn" onclick="clearLogs()">🗑️ Clear Logs</button>
+                    <button class="export-btn" onclick="exportLogs()">📥 Export</button>
+                </div>
+                <div class="logs-container">
+                    <pre id="systemLogsContent">Loading system logs...</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="admin-dashboard-script.js"></script>
+</body>
+
+</html>
