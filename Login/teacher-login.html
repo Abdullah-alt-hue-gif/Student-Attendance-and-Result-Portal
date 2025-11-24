@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Login - Student Portal</title>
+    <link rel="stylesheet" href="login-styles.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <button class="back-btn" onclick="goBack()">← Back to role selection</button>
+            <h2>Teacher Login</h2>
+            <p>Enter your credentials to access your portal</p>
+        </div>
+        
+        <form class="login-form" id="teacherLoginForm">
+            <div class="form-group">
+                <label for="teacherEmail">Email Address *</label>
+                <input type="email" id="teacherEmail" placeholder="teacher@portal.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="teacherPassword">Password *</label>
+                <input type="password" id="teacherPassword" placeholder="Enter your password" required>
+            </div>
+            
+            <div class="form-options">
+                <label class="checkbox-container">
+                    <input type="checkbox" id="rememberTeacher">
+                    <span class="checkmark"></span>
+                    Remember me
+                </label>
+                <a href="#" class="forgot-password">Forgot password?</a>
+            </div>
+            
+            <button type="submit" class="submit-btn">Login</button>
+        </form>
+    </div>
+    
+    <script src="login-script.js"></script>
+</body>
+</html>
