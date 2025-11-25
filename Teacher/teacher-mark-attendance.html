@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Portal - Mark Attendance</title>
+    <link rel="stylesheet" href="teacher-styles.css">
+</head>
+
+<body>
+    <div class="teacher-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>Teacher Portal</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item">
+                    <a href="teacher-dashboard.html">
+                        <span class="icon">📊</span>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="menu-item active">
+                    <a href="teacher-mark-attendance.html">
+                        <span class="icon">📝</span>
+                        Mark Attendance
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="teacher-attendance-history.html">
+                        <span class="icon">🕐</span>
+                        Attendance History
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="teacher-upload-results.html">
+                        <span class="icon">📤</span>
+                        Upload Results
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="teacher-settings.html">
+                        <span class="icon">⚙️</span>
+                        Settings
+                    </a>
+                </li>
+            </ul>
+
+            <!-- User Profile Section -->
+            <div class="user-profile">
+                <div class="user-avatar" id="teacherAvatar">TR</div>
+                <div class="user-info">
+                    <div class="user-name" id="teacherName">John Smith</div>
+                    <div class="user-role">Teacher</div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="content-header">
+                <h1>Mark Attendance</h1>
+                <div class="header-actions">
+                    <div class="notification-wrapper">
+                        <button class="notification-btn" onclick="toggleNotifications()">
+                            🔔
+                            <span class="notification-badge" id="notificationCount">3</span>
+                        </button>
+                        <div class="notification-dropdown" id="notificationDropdown">
+                            <div class="notification-header">
+                                <h4>Notifications</h4>
+                                <span class="mark-read" onclick="markAllRead()">Mark all as read</span>
+                            </div>
+                            <div class="notification-list">
+                                <div class="notification-item unread">
+                                    <div class="notif-icon">📝</div>
+                                    <div class="notif-content">
+                                        <p class="notif-text">New assignment submission from <strong>Sarah
+                                                Johnson</strong></p>
+                                        <span class="notif-time">2 mins ago</span>
+                                    </div>
+                                </div>
+                                <div class="notification-item unread">
+                                    <div class="notif-icon">⚠️</div>
+                                    <div class="notif-content">
+                                        <p class="notif-text">Low attendance alert for <strong>CS101</strong></p>
+                                        <span class="notif-time">1 hour ago</span>
+                                    </div>
+                                </div>
+                                <div class="notification-item">
+                                    <div class="notif-icon">📅</div>
+                                    <div class="notif-content">
+                                        <p class="notif-text">Upcoming deadline: <strong>Midterm Project</strong></p>
+                                        <span class="notif-time">3 hours ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="notification-footer">
+                                <a href="#">View All Notifications</a>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="logout-btn" onclick="logout()">
+                        <span>🚪</span>
+                        Logout
+                    </button>
+                </div>
+            </header>
+
+            <!-- Attendance Marking Section -->
+            <div class="attendance-card">
+                <h3>Attendance Marking</h3>
+
+                <!-- Selection Controls -->
+                <div class="attendance-controls">
+                    <div class="control-group">
+                        <label for="courseSelect">Select Course <span class="required">*</span></label>
+                        <select id="courseSelect" onchange="loadStudents()">
+                            <option value="">-- Select a course --</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="dateSelect">Select Date <span class="required">*</span></label>
+                        <input type="date" id="dateSelect" onchange="updateAttendanceData()">
+                    </div>
+                    <div class="control-group">
+                        <label for="sessionType">Session Type</label>
+                        <select id="sessionType">
+                            <option value="Lecture">Lecture</option>
+                            <option value="Lab">Lab</option>
+                            <option value="Tutorial">Tutorial</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="attendance-stats">
+                    <div class="stat-item">
+                        <div class="stat-label">Total Students</div>
+                        <div class="stat-number" id="totalStudents">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Present</div>
+                        <div class="stat-number present" id="presentCount">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Absent</div>
+                        <div class="stat-number absent" id="absentCount">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Attendance Rate</div>
+                        <div class="stat-number rate" id="attendanceRate">0%</div>
+                    </div>
+                </div>
+
+                <!-- Bulk Actions -->
+                <div class="bulk-actions">
+                    <button class="bulk-btn present-all" onclick="markAllPresent()">Mark All Present</button>
+                    <button class="bulk-btn absent-all" onclick="markAllAbsent()">Mark All Absent</button>
+                </div>
+
+                <!-- Student List -->
+                <div class="student-list-section">
+                    <h4>Student List</h4>
+                    <div class="student-list" id="studentList">
+                        <!-- Students will be loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="attendance-actions">
+                    <button class="cancel-btn" onclick="cancelAttendance()">Cancel</button>
+                    <button class="save-btn" onclick="saveAttendance()">
+                        <span>💾</span>
+                        Save Attendance
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="teacher-mark-attendance-script.js"></script>
+</body>
+
+</html>
