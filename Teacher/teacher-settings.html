@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Portal - Settings</title>
+    <link rel="stylesheet" href="teacher-styles.css">
+</head>
+
+<body>
+    <div class="teacher-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>Teacher Portal</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item">
+                    <a href="teacher-dashboard.html">
+                        <span class="icon">📊</span>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="teacher-mark-attendance.html">
+                        <span class="icon">📝</span>
+                        Mark Attendance
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="teacher-attendance-history.html">
+                        <span class="icon">🕐</span>
+                        Attendance History
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="teacher-upload-results.html">
+                        <span class="icon">📤</span>
+                        Upload Results
+                    </a>
+                </li>
+                <li class="menu-item active">
+                    <a href="teacher-settings.html">
+                        <span class="icon">⚙️</span>
+                        Settings
+                    </a>
+                </li>
+            </ul>
+
+            <!-- User Profile Section -->
+            <div class="user-profile">
+                <div class="user-avatar" id="sidebarAvatar">TR</div>
+                <div class="user-info">
+                    <div class="user-name" id="sidebarName">John Smith</div>
+                    <div class="user-role">Teacher</div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="content-header">
+                <h1>Settings</h1>
+                <div class="header-actions">
+                    <div class="notification-wrapper">
+                        <button class="notification-btn" onclick="toggleNotifications()">
+                            🔔
+                            <span class="notification-badge" id="notificationCount">3</span>
+                        </button>
+                        <div class="notification-dropdown" id="notificationDropdown">
+                            <div class="notification-header">
+                                <h4>Notifications</h4>
+                                <span class="mark-read" onclick="markAllRead()">Mark all as read</span>
+                            </div>
+                            <div class="notification-list">
+                                <div class="notification-item unread">
+                                    <div class="notif-icon">📝</div>
+                                    <div class="notif-content">
+                                        <p class="notif-text">New assignment submission from <strong>Sarah
+                                                Johnson</strong></p>
+                                        <span class="notif-time">2 mins ago</span>
+                                    </div>
+                                </div>
+                                <div class="notification-item unread">
+                                    <div class="notif-icon">⚠️</div>
+                                    <div class="notif-content">
+                                        <p class="notif-text">Low attendance alert for <strong>CS101</strong></p>
+                                        <span class="notif-time">1 hour ago</span>
+                                    </div>
+                                </div>
+                                <div class="notification-item">
+                                    <div class="notif-icon">📅</div>
+                                    <div class="notif-content">
+                                        <p class="notif-text">Upcoming deadline: <strong>Midterm Project</strong></p>
+                                        <span class="notif-time">3 hours ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="notification-footer">
+                                <a href="#">View All Notifications</a>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="logout-btn" onclick="logout()">
+                        <span>🚪</span>
+                        Logout
+                    </button>
+                </div>
+            </header>
+
+            <!-- Settings Container -->
+            <div class="settings-container">
+                <!-- Profile Information Card -->
+                <div class="settings-card-white">
+                    <h3>Profile Information</h3>
+                    <form id="profileForm" onsubmit="return false;">
+                        <div class="form-row">
+                            <div class="form-group-half">
+                                <label for="firstName">First Name</label>
+                                <input type="text" id="firstName" required>
+                            </div>
+                            <div class="form-group-half">
+                                <label for="lastName">Last Name</label>
+                                <input type="text" id="lastName" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" placeholder="+1 (555) 987-6543">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="department">Department</label>
+                            <input type="text" id="department" placeholder="Computer Science">
+                        </div>
+
+                        <button type="button" class="save-changes-btn" onclick="saveProfile()">
+                            <span>💾</span>
+                            Save Changes
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Change Password Card -->
+                <div class="settings-card-white">
+                    <h3>Change Password</h3>
+                    <form id="passwordForm" onsubmit="return false;">
+                        <div class="form-group">
+                            <label for="currentPassword">Current Password</label>
+                            <input type="password" id="currentPassword" placeholder="Enter current password">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="newPassword">New Password</label>
+                            <input type="password" id="newPassword" placeholder="Enter new password">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm New Password</label>
+                            <input type="password" id="confirmPassword" placeholder="Confirm new password">
+                        </div>
+
+                        <button type="button" class="save-changes-btn" onclick="updatePassword()">
+                            <span>🔒</span>
+                            Update Password
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Notification Preferences Card -->
+                <div class="settings-card-white">
+                    <h3>Notification Preferences</h3>
+                    <form id="notificationForm">
+                        <div class="preference-item">
+                            <div class="preference-content">
+                                <input type="checkbox" id="classNotifications" checked>
+                                <label for="classNotifications">
+                                    <strong>Email notifications for upcoming classes</strong>
+                                    <span class="preference-description">Receive reminders 30 minutes before
+                                        class</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="preference-item">
+                            <div class="preference-content">
+                                <input type="checkbox" id="submissionNotifications" checked>
+                                <label for="submissionNotifications">
+                                    <strong>Student submission notifications</strong>
+                                    <span class="preference-description">Get notified when students submit
+                                        assignments</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="preference-item">
+                            <div class="preference-content">
+                                <input type="checkbox" id="attendanceAlerts">
+                                <label for="attendanceAlerts">
+                                    <strong>Low attendance alerts</strong>
+                                    <span class="preference-description">Receive alerts when student attendance is
+                                        low</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="button" class="save-changes-btn" onclick="savePreferences()">
+                            <span>🔔</span>
+                            Save Preferences
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="teacher-settings-script.js"></script>
+</body>
+
+</html>
