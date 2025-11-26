@@ -2256,5 +2256,194 @@ body {
     color: #27ae60;
 }
 
+.grade-b {
+    background: #cfe2ff;
+    color: #3498db;
+}
 
+.grade-c {
+    background: #fff3cd;
+    color: #f39c12;
+}
+
+.grade-d {
+    background: #ffe5d0;
+    color: #e67e22;
+}
+
+.grade-f {
+    background: #f8d7da;
+    color: #e74c3c;
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.status-passed {
+    background: #d4edda;
+    color: #27ae60;
+}
+
+.status-failed {
+    background: #f8d7da;
+    color: #e74c3c;
+}
+
+/* ====================================
+   Teacher Settings Page Styles
+   ==================================== */
+
+.settings-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.settings-card-white {
+    background: white;
+    padding: 32px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.settings-card-white h3 {
+    margin: 0 0 20px 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group-half {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label,
+.form-group-half label {
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: #4a5568;
+    font-size: 0.875rem;
+}
+
+.form-group input,
+.form-group-half input,
+.form-group select {
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    background: white;
+}
+
+.form-group input:focus,
+.form-group-half input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.form-group input[readonly] {
+    background-color: #f7fafc;
+    border-color: #e2e8f0;
+    color: #718096;
+    cursor: not-allowed;
+}
+
+.save-changes-btn {
+    background: #4a90e2;
+    color: white;
+    padding: 10px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.save-changes-btn:hover {
+    background: #3182ce;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.25);
+}
+
+.save-changes-btn:active {
+    transform: translateY(0);
+}
+
+/* Notification Preferences */
+.preference-item {
+    padding: 16px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.preference-item:last-child {
+    border-bottom: none;
+}
+
+.preference-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.preference-content input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.preference-content label {
+    cursor: pointer;
+    flex: 1;
+}
+
+.preference-content label strong {
+    display: block;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 4px;
+}
+
+.preference-description {
+    display: block;
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    margin-top: 4px;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .settings-container {
+        padding: 0 16px;
+    }
 }
