@@ -1,530 +1,680 @@
-// admin-users-script.js
+// ========================================
+// Shared Data Management (Embedded)
+// ========================================
 
-// Global variables
-let users = [];
-let currentPage = 1;
-const usersPerPage = 10;
-let currentEditId = null;
-let currentDeleteId = null;
-let filteredUsers = [];
-
-// Sample initial data with rollNo for students
-const initialUsers = [
-    {
-        id: 1,
-        name: 'John Smith',
-        email: 'john.smith@portal.com',
-        role: 'teacher',
-        status: 'active',
-        createdAt: '2024-01-15',
-        lastLogin: '2025-01-10'
-    },
-    {
-        id: 2,
-        name: 'Sarah Johnson',
-        email: 'sarahj@portal.com',
-        role: 'student',
-        rollNo: 'STU20250001',
-        status: 'active',
-        createdAt: '2024-02-20',
-        lastLogin: '2025-01-08'
-    },
-    {
-        id: 3,
-        name: 'Mike Wilson',
-        email: 'mike.w@portal.com',
-        role: 'teacher',
-        status: 'active',
-        createdAt: '2024-01-10',
-        lastLogin: '2025-01-09'
-    },
-    {
-        id: 4,
-        name: 'Emily Brown',
-        email: 'emily.b@portal.com',
-        role: 'student',
-        rollNo: 'STU20250002',
-        status: 'active',
-        createdAt: '2024-03-05',
-        lastLogin: '2025-01-07'
-    },
-    {
-        id: 5,
-        name: 'David Lee',
-        email: 'david.lee@portal.com',
-        role: 'admin',
-        status: 'active',
-        createdAt: '2024-01-01',
-        lastLogin: '2025-01-11'
-    },
-    {
-        id: 6,
-        name: 'Michael Chen',
-        email: 'michael.chen@portal.com',
-        role: 'student',
-        rollNo: 'STU20250003',
-        status: 'active',
-        createdAt: '2024-03-10',
-        lastLogin: '2025-01-06'
-    },
-    {
-        id: 7,
-        name: 'Lisa Anderson',
-        email: 'lisa.anderson@portal.com',
-        role: 'teacher',
-        status: 'active',
-        createdAt: '2024-01-12',
-        lastLogin: '2025-01-09'
-    },
-    {
-        id: 8,
-        name: 'James Wilson',
-        email: 'james.w@portal.com',
-        role: 'student',
-        rollNo: 'STU20250004',
-        status: 'active',
-        createdAt: '2024-03-15',
-        lastLogin: '2025-01-08'
-    }
-];
-
-// Initialize the page
-document.addEventListener('DOMContentLoaded', function () {
-    checkUserSession();
-    initializeUsersPage();
-    loadUsers();
-});
-
-function checkUserSession() {
-    const userRole = localStorage.getItem('userRole') || sessionStorage.getItem('userRole');
-
-    if (!userRole || userRole !== 'admin') {
-        alert('Please login as admin first');
-        window.location.href = 'admin-login.html';
-        return;
+class DataManager {
+    constructor() {
+        this.initializeData();
     }
 
-    // Update admin name - use userName from login, fallback to email
-    const userName = localStorage.getItem('userName') || sessionStorage.getItem('userName');
-    const userEmail = localStorage.getItem('userEmail') || sessionStorage.getItem('userEmail');
-    const displayName = userName || (userEmail ? userEmail.split('@')[0] : 'Admin');
+    initializeData() {
+        // Initialize with sample data if empty
+        if (!localStorage.getItem('users')) {
+            const sampleUsers = [
+                {
+                    id: 1,
+                    name: 'John Smith',
+                    email: 'john.smith@portal.com',
+                    role: 'Teacher',
+                    status: 'Active',
+                    joinDate: '2024-09-01'
+                },
+                {
+                    id: 2,
+                    name: 'Sarah Johnson',
+                    email: 'sarah.j@portal.com',
+                    role: 'Student',
+                    status: 'Active',
+                    joinDate: '2025-11-10'
+                },
+                {
+                    id: 3,
+                    name: 'Mike Wilson',
+                    email: 'mike.w@portal.com',
+                    role: 'Teacher',
+                    status: 'Active',
+                    joinDate: '2024-08-15'
+                },
+                {
+                    id: 4,
+                    name: 'Emily Brown',
+                    email: 'emily.b@portal.com',
+                    role: 'Student',
+                    status: 'Active',
+                    joinDate: '2025-11-08'
+                },
+                {
+                    id: 5,
+                    name: 'David Lee',
+                    email: 'david.l@portal.com',
+                    role: 'Student',
+                    status: 'Inactive',
+                    joinDate: '2025-10-20'
+                },
+                {
+                    id: 6,
+                    name: 'Lisa Anderson',
+                    email: 'lisa.a@portal.com',
+                    role: 'Teacher',
+                    status: 'Active',
+                    joinDate: '2024-09-05'
+                }
+            ];
+            localStorage.setItem('users', JSON.stringify(sampleUsers));
+        }
 
-    if (document.getElementById('adminUserName')) {
-        document.getElementById('adminUserName').textContent = displayName;
+        if (!localStorage.getItem('courses')) {
+            const sampleCourses = [
+                {
+                    id: 1,
+                    name: 'Computer Science 101',
+                    code: 'CS101',
+                    teacher: 'John Smith',
+                    students: 45,
+                    status: 'Active',
+                    description: 'Introduction to Computer Science'
+                },
+                {
+                    id: 2,
+                    name: 'Mathematics 201',
+                    code: 'MATH201',
+                    teacher: 'Mike Wilson',
+                    students: 38,
+                    status: 'Active',
+                    description: 'Advanced Mathematics'
+                },
+                {
+                    id: 3,
+                    name: 'Physics 301',
+                    code: 'PHY301',
+                    teacher: 'Lisa Anderson',
+                    students: 32,
+                    status: 'Active',
+                    description: 'Advanced Physics'
+                },
+                {
+                    id: 4,
+                    name: 'Chemistry 102',
+                    code: 'CHEM102',
+                    teacher: 'John Smith',
+                    students: 41,
+                    status: 'Active',
+                    description: 'General Chemistry'
+                },
+                {
+                    id: 5,
+                    name: 'English Literature',
+                    code: 'ENG201',
+                    teacher: 'Lisa Anderson',
+                    students: 29,
+                    status: 'Active',
+                    description: 'English Literature and Composition'
+                },
+                {
+                    id: 6,
+                    name: 'Biology 101',
+                    code: 'BIO101',
+                    teacher: 'Mike Wilson',
+                    students: 35,
+                    status: 'Active',
+                    description: 'Introduction to Biology'
+                },
+                {
+                    id: 7,
+                    name: 'History 201',
+                    code: 'HIST201',
+                    teacher: 'John Smith',
+                    students: 28,
+                    status: 'Active',
+                    description: 'World History'
+                },
+                {
+                    id: 8,
+                    name: 'Art and Design',
+                    code: 'ART101',
+                    teacher: 'Lisa Anderson',
+                    students: 22,
+                    status: 'Active',
+                    description: 'Introduction to Art and Design'
+                }
+            ];
+            localStorage.setItem('courses', JSON.stringify(sampleCourses));
+        }
+
+        if (!localStorage.getItem('attendanceAlerts')) {
+            const sampleAlerts = [
+                {
+                    id: 1,
+                    studentName: 'David Lee',
+                    course: 'Computer Science 101',
+                    attendance: 45,
+                    status: 'Critical'
+                },
+                {
+                    id: 2,
+                    studentName: 'Emily Brown',
+                    course: 'Mathematics 201',
+                    attendance: 62,
+                    status: 'Warning'
+                },
+                {
+                    id: 3,
+                    studentName: 'Sarah Johnson',
+                    course: 'Physics 301',
+                    attendance: 58,
+                    status: 'Warning'
+                }
+            ];
+            localStorage.setItem('attendanceAlerts', JSON.stringify(sampleAlerts));
+        }
+
+        if (!localStorage.getItem('attendanceTrends')) {
+            const trends = [
+                { month: 'Jan', percentage: 85 },
+                { month: 'Feb', percentage: 82 },
+                { month: 'Mar', percentage: 88 },
+                { month: 'Apr', percentage: 86 },
+                { month: 'May', percentage: 90 },
+                { month: 'Jun', percentage: 87 }
+            ];
+            localStorage.setItem('attendanceTrends', JSON.stringify(trends));
+        }
     }
-}
 
-function initializeUsersPage() {
-    // Load users from localStorage or use initial data
-    const savedUsers = localStorage.getItem('portalUsers');
-    if (savedUsers) {
-        users = JSON.parse(savedUsers);
-    } else {
-        users = [...initialUsers];
-        saveUsers();
+    // Users CRUD
+    getUsers() {
+        return JSON.parse(localStorage.getItem('users')) || [];
     }
 
-    filteredUsers = [...users];
-
-    // Setup search functionality
-    const searchInput = document.getElementById('userSearch');
-    searchInput.addEventListener('input', function () {
-        searchUsers();
-    });
-
-    // Setup form submission
-    document.getElementById('userForm').addEventListener('submit', handleUserFormSubmit);
-
-    // Render initial table
-    renderUsersTable();
-}
-
-// User Management Functions
-function loadUsers() {
-    // In a real application, this would be an API call
-    console.log('Loading users...');
-}
-
-function saveUsers() {
-    localStorage.setItem('portalUsers', JSON.stringify(users));
-}
-
-function renderUsersTable() {
-    const tableBody = document.getElementById('usersTableBody');
-    const startIndex = (currentPage - 1) * usersPerPage;
-    const endIndex = startIndex + usersPerPage;
-    const usersToShow = filteredUsers.slice(startIndex, endIndex);
-
-    tableBody.innerHTML = '';
-
-    if (usersToShow.length === 0) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="7" style="text-align: center; padding: 40px; color: #7f8c8d;">
-                    No users found. <a href="javascript:void(0)" onclick="openAddUserModal()">Add the first user</a>
-                </td>
-            </tr>
-        `;
-        return;
+    addUser(user) {
+        const users = this.getUsers();
+        user.id = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
+        user.joinDate = new Date().toISOString().split('T')[0];
+        if (!user.status) user.status = 'Active';
+        users.push(user);
+        localStorage.setItem('users', JSON.stringify(users));
+        return user;
     }
 
-    usersToShow.forEach(user => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${user.id}</td>
-            <td>${user.name}</td>
-            <td><span class="role-badge ${user.role}">${user.role.charAt(0).toUpperCase() + user.role.slice(1)}</span></td>
-            <td>${user.email}</td>
-            <td><span class="status-badge ${user.status}">${user.status.charAt(0).toUpperCase() + user.status.slice(1)}</span></td>
-            <td>${formatDate(user.createdAt)}</td>
-            <td>
-                <div class="action-buttons">
-                    <button class="view-btn" onclick="viewUser(${user.id})" title="View Details">👁️</button>
-                    <button class="edit-btn" onclick="editUser(${user.id})" title="Edit User">✏️</button>
-                    <button class="delete-btn" onclick="deleteUser(${user.id})" title="Delete User">🗑️</button>
-                </div>
-            </td>
-        `;
-        tableBody.appendChild(row);
-    });
-
-    updatePagination();
-}
-
-function updatePagination() {
-    const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
-    const pageInfo = document.getElementById('pageInfo');
-    const prevBtn = document.getElementById('prevPage');
-    const nextBtn = document.getElementById('nextPage');
-
-    pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
-    prevBtn.disabled = currentPage === 1;
-    nextBtn.disabled = currentPage === totalPages || totalPages === 0;
-}
-
-function changePage(direction) {
-    const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
-    const newPage = currentPage + direction;
-
-    if (newPage >= 1 && newPage <= totalPages) {
-        currentPage = newPage;
-        renderUsersTable();
-    }
-}
-
-// Search and Filter Functions
-function searchUsers() {
-    const query = document.getElementById('userSearch').value.toLowerCase().trim();
-
-    if (query === '') {
-        filteredUsers = [...users];
-    } else {
-        filteredUsers = users.filter(user =>
-            user.name.toLowerCase().includes(query) ||
-            user.email.toLowerCase().includes(query) ||
-            user.role.toLowerCase().includes(query) ||
-            user.status.toLowerCase().includes(query)
-        );
+    updateUser(id, updatedData) {
+        const users = this.getUsers();
+        const index = users.findIndex(u => u.id === id);
+        if (index !== -1) {
+            users[index] = { ...users[index], ...updatedData };
+            localStorage.setItem('users', JSON.stringify(users));
+            return users[index];
+        }
+        return null;
     }
 
-    currentPage = 1;
-    renderUsersTable();
-}
-
-// Modal Management Functions
-function openAddUserModal() {
-    const modal = document.getElementById('userModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const submitBtn = document.getElementById('modalSubmitBtn');
-    const passwordGroup = document.getElementById('passwordGroup');
-
-    modalTitle.textContent = 'Add New User';
-    submitBtn.textContent = 'Add User';
-    passwordGroup.style.display = 'block';
-
-    document.getElementById('userForm').reset();
-    document.getElementById('userId').value = '';
-
-    modal.style.display = 'block';
-}
-
-function editUser(userId) {
-    const user = users.find(u => u.id === userId);
-    if (!user) {
-        showToast('User not found!', 'error');
-        return;
+    deleteUser(id) {
+        const users = this.getUsers();
+        const filtered = users.filter(u => u.id !== id);
+        localStorage.setItem('users', JSON.stringify(filtered));
     }
 
-    const modal = document.getElementById('userModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const submitBtn = document.getElementById('modalSubmitBtn');
-    const passwordGroup = document.getElementById('passwordGroup');
+    // Courses CRUD
+    getCourses() {
+        return JSON.parse(localStorage.getItem('courses')) || [];
+    }
 
-    modalTitle.textContent = 'Edit User';
-    submitBtn.textContent = 'Update User';
-    passwordGroup.style.display = 'none';
+    addCourse(course) {
+        const courses = this.getCourses();
+        course.id = courses.length > 0 ? Math.max(...courses.map(c => c.id)) + 1 : 1;
+        course.students = 0;
+        course.status = 'Active';
+        courses.push(course);
+        localStorage.setItem('courses', JSON.stringify(courses));
+        return course;
+    }
 
-    // Fill form with user data
-    document.getElementById('userId').value = user.id;
-    document.getElementById('userName').value = user.name;
-    document.getElementById('userEmail').value = user.email;
-    document.getElementById('userRole').value = user.role;
-    document.getElementById('userStatus').value = user.status;
+    updateCourse(id, updatedData) {
+        const courses = this.getCourses();
+        const index = courses.findIndex(c => c.id === id);
+        if (index !== -1) {
+            courses[index] = { ...courses[index], ...updatedData };
+            localStorage.setItem('courses', JSON.stringify(courses));
+            return courses[index];
+        }
+        return null;
+    }
 
-    currentEditId = userId;
-    modal.style.display = 'block';
-}
+    deleteCourse(id) {
+        const courses = this.getCourses();
+        const filtered = courses.filter(c => c.id !== id);
+        localStorage.setItem('courses', JSON.stringify(filtered));
+    }
 
-function viewUser(userId) {
-    const user = users.find(u => u.id === userId);
-    if (user) {
-        const rollNoText = user.rollNo ? `\nRoll No: ${user.rollNo}` : '';
-        alert(`User Details:\n\nName: ${user.name}\nEmail: ${user.email}\nRole: ${user.role}${rollNoText}\nStatus: ${user.status}\nCreated: ${formatDate(user.createdAt)}\nLast Login: ${user.lastLogin ? formatDate(user.lastLogin) : 'Never'}`);
+    // Attendance Alerts
+    getAttendanceAlerts() {
+        return JSON.parse(localStorage.getItem('attendanceAlerts')) || [];
+    }
+
+    getAttendanceTrends() {
+        return JSON.parse(localStorage.getItem('attendanceTrends')) || [];
     }
 }
 
-function deleteUser(userId) {
-    const user = users.find(u => u.id === userId);
-    if (!user) {
-        showToast('User not found!', 'error');
-        return;
+// Toast Notification System
+function showToast(message, type = 'success') {
+    // Create toast container if it doesn't exist
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
     }
 
-    // Prevent admin from deleting themselves
-    const currentUserEmail = localStorage.getItem('userEmail') || sessionStorage.getItem('userEmail');
-    if (user.email === currentUserEmail) {
-        showToast('You cannot delete your own account!', 'error');
-        return;
-    }
-
-    currentDeleteId = userId;
-    document.getElementById('deleteMessage').textContent = `Are you sure you want to delete user "${user.name}" (${user.email})? This action cannot be undone.`;
-    document.getElementById('deleteModal').style.display = 'block';
-}
-
-function confirmDelete() {
-    if (currentDeleteId === null) return;
-
-    users = users.filter(user => user.id !== currentDeleteId);
-    filteredUsers = filteredUsers.filter(user => user.id !== currentDeleteId);
-
-    saveUsers();
-    renderUsersTable();
-    showToast('User deleted successfully!', 'success');
-    closeDeleteModal();
-}
-
-// Form Handling
-function handleUserFormSubmit(e) {
-    e.preventDefault();
-
-    const role = document.getElementById('userRole').value;
-    const formData = {
-        id: document.getElementById('userId').value ? parseInt(document.getElementById('userId').value) : generateUserId(),
-        name: document.getElementById('userName').value.trim(),
-        email: document.getElementById('userEmail').value.trim().toLowerCase(),
-        role: role,
-        status: document.getElementById('userStatus').value,
-        createdAt: document.getElementById('userId').value ?
-            users.find(u => u.id === parseInt(document.getElementById('userId').value))?.createdAt :
-            new Date().toISOString().split('T')[0],
-        lastLogin: null
+    // Toast icons
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-times-circle',
+        warning: 'fa-exclamation-circle',
+        info: 'fa-info-circle'
     };
 
-    // Auto-generate rollNo for students  
-    if (role === 'student' && !document.getElementById('userId').value) {
-        const year = new Date().getFullYear();
-        const studentCount = users.filter(u => u.role === 'student').length + 1;
-        formData.rollNo = `STU${year}${String(studentCount).padStart(4, '0')}`;
-    } else if (role === 'student' && document.getElementById('userId').value) {
-        // Keep existing rollNo when editing
-        const existingUser = users.find(u => u.id === parseInt(document.getElementById('userId').value));
-        formData.rollNo = existingUser?.rollNo || `STU${new Date().getFullYear()}${String(formData.id).padStart(4, '0')}`;
-    }
-
-    // Validation
-    if (!validateUserForm(formData)) {
-        return;
-    }
-
-    // Check for duplicate email (excluding current user in edit mode)
-    const existingUser = users.find(u => u.email === formData.email && u.id !== formData.id);
-    if (existingUser) {
-        showToast('A user with this email already exists!', 'error');
-        return;
-    }
-
-    if (currentEditId) {
-        // Update existing user
-        const index = users.findIndex(u => u.id === currentEditId);
-        if (index !== -1) {
-            users[index] = { ...users[index], ...formData };
-            showToast('User updated successfully!', 'success');
-        }
-    } else {
-        // Add new user
-        users.push(formData);
-        showToast('User added successfully!', 'success');
-    }
-
-    saveUsers();
-    filteredUsers = [...users];
-    renderUsersTable();
-    closeUserModal();
-}
-
-function validateUserForm(formData) {
-    // Name validation
-    if (formData.name.length < 2) {
-        showToast('Name must be at least 2 characters long!', 'error');
-        return false;
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-        showToast('Please enter a valid email address!', 'error');
-        return false;
-    }
-
-    // Role validation
-    if (!['student', 'teacher', 'admin'].includes(formData.role)) {
-        showToast('Please select a valid role!', 'error');
-        return false;
-    }
-
-    // Password validation (only for new users)
-    if (!currentEditId) {
-        const password = document.getElementById('userPassword').value;
-        if (password.length < 8) {
-            showToast('Password must be at least 8 characters long!', 'error');
-            return false;
-        }
-
-        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
-        if (!passwordRegex.test(password)) {
-            showToast('Password must contain both letters and numbers!', 'error');
-            return false;
-        }
-    }
-
-    return true;
-}
-
-// Utility Functions
-function generateUserId() {
-    const maxId = users.reduce((max, user) => Math.max(max, user.id), 0);
-    return maxId + 1;
-}
-
-function formatDate(dateString) {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
-}
-
-function closeUserModal() {
-    document.getElementById('userModal').style.display = 'none';
-    currentEditId = null;
-    document.getElementById('userForm').reset();
-}
-
-function closeDeleteModal() {
-    document.getElementById('deleteModal').style.display = 'none';
-    currentDeleteId = null;
-}
-
-function showToast(message, type = 'info') {
+    // Create toast element
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    toast.textContent = message;
+    toast.innerHTML = `
+        <div class="toast-icon">
+            <i class="fas ${icons[type] || icons.success}"></i>
+        </div>
+        <div class="toast-content">
+            <div class="toast-message">${message}</div>
+        </div>
+        <button class="toast-close">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
 
-    document.body.appendChild(toast);
+    // Add to container
+    container.appendChild(toast);
 
-    // Show toast
-    setTimeout(() => toast.classList.add('show'), 100);
+    // Close button handler
+    const closeBtn = toast.querySelector('.toast-close');
+    closeBtn.addEventListener('click', () => {
+        removeToast(toast);
+    });
 
-    // Remove toast after 3 seconds
+    // Auto remove after 3 seconds
     setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toast.parentNode.removeChild(toast);
-            }
-        }, 300);
+        removeToast(toast);
     }, 3000);
 }
 
-// Export/Import Functions
-function exportUsers() {
-    const dataStr = JSON.stringify(users, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(dataBlob);
-    link.download = `users-backup-${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-
-    showToast('Users exported successfully!', 'success');
+function removeToast(toast) {
+    toast.classList.add('removing');
+    setTimeout(() => {
+        toast.remove();
+    }, 300);
 }
 
-function importUsers(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+// Shared UI Logic
+function checkAdminSession() {
+    const session = JSON.parse(localStorage.getItem('adminSession') || '{}');
+    if (!session.isLoggedIn) {
+        window.location.href = '../login/admin-login.html';
+        return;
+    }
 
-    const reader = new FileReader();
-    reader.onload = function (e) {
-        try {
-            const importedUsers = JSON.parse(e.target.result);
-
-            if (!Array.isArray(importedUsers)) {
-                throw new Error('Invalid file format');
-            }
-
-            // Validate imported users
-            const validUsers = importedUsers.filter(user =>
-                user.id && user.name && user.email && user.role && user.status
-            );
-
-            if (validUsers.length === 0) {
-                throw new Error('No valid users found in file');
-            }
-
-            if (confirm(`Import ${validUsers.length} users? This will replace current users.`)) {
-                users = validUsers;
-                filteredUsers = [...users];
-                saveUsers();
-                renderUsersTable();
-                showToast(`${validUsers.length} users imported successfully!`, 'success');
-            }
-        } catch (error) {
-            showToast('Error importing users: ' + error.message, 'error');
-        }
-    };
-
-    reader.readAsText(file);
-    event.target.value = ''; // Reset file input
+    // Display admin name if element exists
+    const adminNameEl = document.getElementById('adminName');
+    if (adminNameEl) {
+        adminNameEl.textContent = session.adminName || 'Admin User';
+    }
 }
 
-// Close modals when clicking outside
-window.onclick = function (event) {
-    const modals = document.querySelectorAll('.modal');
-    modals.forEach(modal => {
-        if (event.target === modal) {
-            if (modal.id === 'userModal') closeUserModal();
-            if (modal.id === 'deleteModal') closeDeleteModal();
+function setupSidebar() {
+    // Mobile menu toggle
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    if (menuToggle && sidebar) {
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+    }
+
+    // Logout
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('adminSession');
+                window.location.href = '../login/admin-login.html';
+            }
+        });
+    }
+
+    // Highlight active nav item
+    const currentPage = window.location.pathname.split('/').pop();
+    document.querySelectorAll('.nav-item').forEach(item => {
+        const href = item.getAttribute('href');
+        if (href === currentPage || (currentPage === 'manage-users.html' && href === 'manage-users.html')) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
         }
     });
-};
+}
 
-// Keyboard shortcuts
-document.addEventListener('keydown', function (e) {
-    if (e.ctrlKey && e.key === 'n') {
+// Notification Dropdown System
+function setupNotificationDropdown() {
+    const notificationIcon = document.querySelector('.notification-icon');
+    if (!notificationIcon) return;
+
+    // Create dropdown HTML if it doesn't exist
+    let dropdown = document.getElementById('notificationDropdown');
+    if (!dropdown) {
+        dropdown = document.createElement('div');
+        dropdown.id = 'notificationDropdown';
+        dropdown.className = 'notification-dropdown';
+        notificationIcon.appendChild(dropdown);
+    }
+
+    // Toggle dropdown on bell icon click
+    notificationIcon.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('active');
+        if (dropdown.classList.contains('active')) {
+            populateNotifications();
+        }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!notificationIcon.contains(e.target)) {
+            dropdown.classList.remove('active');
+        }
+    });
+}
+
+function populateNotifications() {
+    const dropdown = document.getElementById('notificationDropdown');
+    if (!dropdown) return;
+
+    const dataManager = new DataManager();
+    const alerts = dataManager.getAttendanceAlerts();
+
+    // Build notification HTML
+    const notificationsHTML = `
+        <div class="notification-header">
+            <h3>Notifications</h3>
+            <button class="mark-all-read" onclick="markAllNotificationsRead()">Mark all read</button>
+        </div>
+        <div class="notification-list">
+            ${alerts.length > 0 ? alerts.map(alert => `
+                <div class="notification-item ${alert.read ? '' : 'unread'}" data-id="${alert.id}">
+                    <div class="notification-icon-wrapper ${alert.status.toLowerCase()}">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-title">Low Attendance Alert</div>
+                        <div class="notification-message">${alert.studentName} - ${alert.course}: ${alert.attendance}% attendance</div>
+                        <div class="notification-time">2 hours ago</div>
+                    </div>
+                </div>
+            `).join('') : `
+                <div class="notification-empty">
+                    <i class="fas fa-bell-slash"></i>
+                    <p>No new notifications</p>
+                </div>
+            `}
+        </div>
+        ${alerts.length > 0 ? `
+            <div class="notification-footer">
+                <a href="#" class="view-all-notifications">View all notifications</a>
+            </div>
+        ` : ''}
+    `;
+
+    dropdown.innerHTML = notificationsHTML;
+}
+
+function markAllNotificationsRead() {
+    const items = document.querySelectorAll('.notification-item.unread');
+    items.forEach(item => item.classList.remove('unread'));
+    showToast('All notifications marked as read', 'success');
+}
+
+// ========================================
+// Manage Users Page Controller
+// ========================================
+
+class UsersController {
+    constructor() {
+        this.dataManager = new DataManager();
+        this.currentPage = 1;
+        this.itemsPerPage = 6;
+        this.editingUserId = null;
+        this.searchQuery = '';
+
+        this.init();
+    }
+
+    init() {
+        checkAdminSession();
+        setupSidebar();
+        setupNotificationDropdown();
+        this.setupEventListeners();
+        this.renderUsersTable();
+
+        // Check for action parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('action') === 'add') {
+            this.openUserModal();
+        }
+    }
+
+    setupEventListeners() {
+        // Modal buttons
+        document.getElementById('addUserModalBtn')?.addEventListener('click', () => this.openUserModal());
+        document.getElementById('closeUserModal')?.addEventListener('click', () => this.closeUserModal());
+        document.getElementById('cancelUserBtn')?.addEventListener('click', () => this.closeUserModal());
+
+        // Form submission
+        document.getElementById('userForm')?.addEventListener('submit', (e) => this.handleUserSubmit(e));
+
+        // Search
+        document.getElementById('userSearch')?.addEventListener('input', (e) => {
+            this.searchQuery = e.target.value;
+            this.currentPage = 1; // Reset to first page on search
+            this.renderUsersTable();
+        });
+
+        // Pagination
+        document.getElementById('prevPageBtn')?.addEventListener('click', () => {
+            if (this.currentPage > 1) {
+                this.currentPage--;
+                this.renderUsersTable();
+            }
+        });
+
+        document.getElementById('nextPageBtn')?.addEventListener('click', () => {
+            const totalPages = this.getTotalPages();
+            if (this.currentPage < totalPages) {
+                this.currentPage++;
+                this.renderUsersTable();
+            }
+        });
+
+        // Close modal on outside click
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                this.closeUserModal();
+            }
+        });
+    }
+
+    getFilteredUsers() {
+        const users = this.dataManager.getUsers();
+        if (!this.searchQuery) return users;
+
+        return users.filter(u =>
+            u.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+            u.email.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+            u.role.toLowerCase().includes(this.searchQuery.toLowerCase())
+        );
+    }
+
+    getTotalPages() {
+        return Math.ceil(this.getFilteredUsers().length / this.itemsPerPage);
+    }
+
+    renderUsersTable() {
+        const filteredUsers = this.getFilteredUsers();
+        const start = (this.currentPage - 1) * this.itemsPerPage;
+        const end = start + this.itemsPerPage;
+        const paginatedUsers = filteredUsers.slice(start, end);
+
+        const tbody = document.getElementById('usersTableBody');
+        if (!tbody) return;
+
+        tbody.innerHTML = paginatedUsers.map(user => `
+            <tr>
+                <td>
+                    <div class="user-cell">
+                        <div class="user-avatar-small">${this.getInitials(user.name)}</div>
+                        <span class="user-name-text">${user.name}</span>
+                    </div>
+                </td>
+                <td><span class="role-badge ${user.role.toLowerCase()}">${user.role}</span></td>
+                <td>${user.email}</td>
+                <td><span class="status-badge ${user.status.toLowerCase()}">${user.status}</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="icon-btn edit-btn" onclick="usersController.editUser(${user.id})">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+                        <button class="icon-btn delete-btn" onclick="usersController.deleteUser(${user.id})">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+
+        this.updatePagination(filteredUsers.length);
+    }
+
+    updatePagination(totalItems) {
+        const totalPages = this.getTotalPages();
+        const start = (this.currentPage - 1) * this.itemsPerPage + 1;
+        const end = Math.min(start + this.itemsPerPage - 1, totalItems);
+
+        document.getElementById('paginationInfo').textContent =
+            totalItems > 0 ? `Showing ${start} to ${end} of ${totalItems} users` : 'No users found';
+
+        document.getElementById('prevPageBtn').disabled = this.currentPage === 1;
+        document.getElementById('nextPageBtn').disabled = this.currentPage === totalPages || totalPages === 0;
+
+        // Render page numbers
+        const numbersContainer = document.getElementById('paginationNumbers');
+        if (numbersContainer) {
+            numbersContainer.innerHTML = '';
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.className = `pagination-btn ${i === this.currentPage ? 'active' : ''}`;
+                btn.textContent = i;
+                btn.onclick = () => {
+                    this.currentPage = i;
+                    this.renderUsersTable();
+                };
+                numbersContainer.appendChild(btn);
+            }
+        }
+    }
+
+    getInitials(name) {
+        return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    }
+
+    openUserModal(user = null) {
+        const modal = document.getElementById('userModal');
+        const form = document.getElementById('userForm');
+        const title = document.getElementById('userModalTitle');
+        const submitBtn = document.getElementById('submitUserBtn');
+        const passwordInput = document.getElementById('userPassword');
+
+        if (user) {
+            this.editingUserId = user.id;
+            title.textContent = 'Edit User';
+            submitBtn.textContent = 'Update User';
+            document.getElementById('userName').value = user.name;
+            document.getElementById('userEmail').value = user.email;
+            document.getElementById('userRole').value = user.role;
+            // Make password optional for editing
+            passwordInput.required = false;
+            passwordInput.placeholder = 'Leave blank to keep current password';
+            passwordInput.value = '';
+        } else {
+            this.editingUserId = null;
+            title.textContent = 'Create New User';
+            submitBtn.textContent = 'Create User';
+            form.reset();
+            // Make password required for new users
+            passwordInput.required = true;
+            passwordInput.placeholder = 'Enter password';
+        }
+
+        modal.classList.add('active');
+    }
+
+    closeUserModal() {
+        document.getElementById('userModal').classList.remove('active');
+        this.editingUserId = null;
+    }
+
+    handleUserSubmit(e) {
         e.preventDefault();
-        openAddUserModal();
+
+        const userData = {
+            name: document.getElementById('userName').value,
+            email: document.getElementById('userEmail').value,
+            role: document.getElementById('userRole').value
+        };
+
+        // Only include password for new users or if changed
+        const password = document.getElementById('userPassword').value;
+        if (password) {
+            userData.password = password;
+        }
+
+        if (this.editingUserId) {
+            // Update existing user
+            this.dataManager.updateUser(this.editingUserId, userData);
+            showToast('User updated successfully!', 'success');
+        } else {
+            // Add new user
+            userData.status = 'Active';
+            this.dataManager.addUser(userData);
+            showToast('User added successfully!', 'success');
+        }
+
+        this.closeUserModal();
+        this.renderUsersTable();
     }
 
-    if (e.key === 'Escape') {
-        closeUserModal();
-        closeDeleteModal();
+    editUser(id) {
+        const users = this.dataManager.getUsers();
+        const user = users.find(u => u.id === id);
+        if (user) {
+            this.openUserModal(user);
+        }
     }
+
+    deleteUser(id) {
+        if (confirm('Are you sure you want to delete this user?')) {
+            this.dataManager.deleteUser(id);
+            this.renderUsersTable();
+            showToast('User deleted successfully!', 'success');
+        }
+    }
+}
+
+// Initialize controller
+let usersController;
+document.addEventListener('DOMContentLoaded', () => {
+    usersController = new UsersController();
 });
