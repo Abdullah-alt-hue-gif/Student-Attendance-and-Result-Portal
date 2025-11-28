@@ -4,151 +4,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Portal - Settings</title>
+    <title>Settings - Admin Portal</title>
     <link rel="stylesheet" href="admin-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
-    <div class="admin-container">
-        <!-- Sidebar -->
-        <nav class="sidebar">
-            <div class="sidebar-header">
-                <h2>Admin Portal</h2>
-            </div>
-            <ul class="sidebar-menu">
-                <li class="menu-item"><a href="admin-dashboard.html">📊 Dashboard</a></li>
-                <li class="menu-item"><a href="admin-users.html">👥 Manage Users</a></li>
-                <li class="menu-item"><a href="admin-courses.html">📚 Manage Courses</a></li>
-                <li class="menu-item"><a href="admin-reports.html">📈 Reports</a></li>
-                <li class="menu-item active"><a href="admin-settings.html">⚙️ Settings</a></li>
-            </ul>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Admin Portal</h2>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="admin-dashboard.html" class="nav-item">
+                <i class="fas fa-th-large"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="admin-users.html" class="nav-item">
+                <i class="fas fa-users"></i>
+                <span>Manage Users</span>
+            </a>
+            <a href="admin-courses.html" class="nav-item">
+                <i class="fas fa-book"></i>
+                <span>Manage Courses</span>
+            </a>
+            <a href="admin-reports.html" class="nav-item">
+                <i class="fas fa-file-alt"></i>
+                <span>Reports</span>
+            </a>
+            <a href="admin-settings.html" class="nav-item active">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
         </nav>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Header -->
-            <header class="content-header">
-                <h1>Settings</h1>
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">AD</div>
                 <div class="user-info">
-                    <span>🔔</span>
-                    <button class="logout-btn-simple" onclick="logout()">
-                        ↪️ Logout
-                    </button>
+                    <div class="user-name" id="adminName">Admin User</div>
+                    <div class="user-role">Admin</div>
                 </div>
-            </header>
+            </div>
+        </div>
+    </div>
 
-            <!-- Settings Sections -->
-            <div class="settings-container">
-                <!-- Profile Settings -->
-                <div class="settings-card-white">
-                    <h3>Profile Settings</h3>
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title">Settings</h1>
+            </div>
+            <div class="header-right">
+                <div class="notification-icon">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationCount">3</span>
+                </div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Settings Page Content -->
+        <div class="page" id="settingsPage">
+            <!-- Profile Settings -->
+            <div class="card settings-card">
+                <div class="card-header">
+                    <h2>Profile Settings</h2>
+                </div>
+                <form id="profileForm" class="settings-form">
                     <div class="form-row">
-                        <div class="form-group-half">
+                        <div class="form-group">
                             <label for="firstName">First Name</label>
-                            <input type="text" id="firstName" value="Admin" placeholder="First Name">
+                            <input type="text" class="form-control" id="firstName" placeholder="Admin">
                         </div>
-                        <div class="form-group-half">
+                        <div class="form-group">
                             <label for="lastName">Last Name</label>
-                            <input type="text" id="lastName" value="User" placeholder="Last Name">
+                            <input type="text" class="form-control" id="lastName" placeholder="User">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="emailAddress">Email Address</label>
-                        <input type="email" id="emailAddress" value="admin@portal.com" placeholder="Email Address">
+                        <label for="email">Email Address</label>
+                        <input type="email" class="form-control" id="email" placeholder="admin@portal.com">
                     </div>
                     <div class="form-group">
-                        <label for="phoneNumber">Phone Number</label>
-                        <input type="tel" id="phoneNumber" value="+1 (555) 123-4567" placeholder="Phone Number">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" class="form-control" id="phone" placeholder="+1 (555) 123-4567">
                     </div>
-                    <button class="save-changes-btn" onclick="saveProfileSettings()">
-                        💾 Save Changes
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
                     </button>
-                </div>
+                </form>
+            </div>
 
-                <!-- Change Password -->
-                <div class="settings-card-white">
-                    <h3>Change Password</h3>
+            <!-- Change Password -->
+            <div class="card settings-card">
+                <div class="card-header">
+                    <h2>Change Password</h2>
+                </div>
+                <form id="passwordForm" class="settings-form">
                     <div class="form-group">
                         <label for="currentPassword">Current Password</label>
-                        <input type="password" id="currentPassword" placeholder="Enter current password">
+                        <input type="password" class="form-control" id="currentPassword"
+                            placeholder="Enter current password">
                     </div>
                     <div class="form-group">
                         <label for="newPassword">New Password</label>
-                        <input type="password" id="newPassword" placeholder="Enter new password">
+                        <input type="password" class="form-control" id="newPassword" placeholder="Enter new password">
                     </div>
                     <div class="form-group">
                         <label for="confirmPassword">Confirm New Password</label>
-                        <input type="password" id="confirmPassword" placeholder="Confirm new password">
+                        <input type="password" class="form-control" id="confirmPassword"
+                            placeholder="Confirm new password">
                     </div>
-                    <button class="save-changes-btn" onclick="updatePassword()">
-                        💾 Update Password
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-key"></i> Update Password
                     </button>
-                </div>
+                </form>
+            </div>
 
-                <!-- System Settings -->
-                <div class="settings-card-white">
-                    <h3>System Settings</h3>
+            <!-- System Settings -->
+            <div class="card settings-card">
+                <div class="card-header">
+                    <h2>System Settings</h2>
+                </div>
+                <form id="systemForm" class="settings-form">
                     <div class="form-group">
                         <label for="academicYear">Academic Year</label>
-                        <select id="academicYear">
+                        <select class="form-control" id="academicYear">
                             <option value="2024-2025">2024-2025</option>
                             <option value="2025-2026" selected>2025-2026</option>
                             <option value="2026-2027">2026-2027</option>
+                            <option value="2027-2028">2027-2028</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="semester">Semester</label>
-                        <select id="semester">
+                        <select class="form-control" id="semester">
                             <option value="Spring 2025">Spring 2025</option>
+                            <option value="Summer 2025">Summer 2025</option>
                             <option value="Fall 2025" selected>Fall 2025</option>
                             <option value="Winter 2026">Winter 2026</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="attendanceThreshold">Minimum Attendance Threshold (%)</label>
-                        <input type="number" id="attendanceThreshold" value="75" min="0" max="100">
+                        <input type="number" class="form-control" id="attendanceThreshold" min="0" max="100" value="75">
                     </div>
-                    <button class="save-changes-btn" onclick="saveSystemSettings()">
-                        💾 Save Settings
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Save Settings
                     </button>
-                </div>
-
-                <!-- Notification Preferences -->
-                <div class="settings-card-white">
-                    <h3>Notification Preferences</h3>
-                    <div class="checkbox-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="lowAttendanceAlerts" checked>
-                            <div class="checkbox-text">
-                                <strong>Email notifications for low attendance alerts</strong>
-                                <small>Receive emails when student attendance falls below threshold</small>
-                            </div>
-                        </label>
-                    </div>
-                    <div class="checkbox-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="newUserNotifications" checked>
-                            <div class="checkbox-text">
-                                <strong>New user registration notifications</strong>
-                                <small>Get notified when new users join the system</small>
-                            </div>
-                        </label>
-                    </div>
-                    <div class="checkbox-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="weeklySummary">
-                            <div class="checkbox-text">
-                                <strong>Weekly summary reports</strong>
-                                <small>Receive weekly attendance and performance summaries</small>
-                            </div>
-                        </label>
-                    </div>
-                    <button class="save-changes-btn" onclick="saveNotificationPreferences()">
-                        💾 Save Preferences
-                    </button>
-                </div>
+                </form>
             </div>
-        </main>
+
+            <!-- Notification Preferences -->
+            <div class="card settings-card">
+                <div class="card-header">
+                    <h2>Notification Preferences</h2>
+                </div>
+                <form id="notificationForm" class="settings-form">
+                    <div class="notification-option">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="emailAttendance" checked>
+                            <label for="emailAttendance">
+                                <strong>Email notifications for low attendance alerts</strong>
+                                <p class="option-description">Receive emails when student attendance falls below
+                                    threshold</p>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="notification-option">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="emailRegistration" checked>
+                            <label for="emailRegistration">
+                                <strong>New user registration notifications</strong>
+                                <p class="option-description">Get notified when new users join the system</p>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="notification-option">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="weeklyReports">
+                            <label for="weeklyReports">
+                                <strong>Weekly summary reports</strong>
+                                <p class="option-description">Receive weekly attendance and performance summaries</p>
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-bell"></i> Save Preferences
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script src="admin-settings-script.js"></script>
