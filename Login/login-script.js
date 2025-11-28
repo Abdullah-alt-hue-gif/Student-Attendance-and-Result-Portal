@@ -1,141 +1,125 @@
-// login-script.js
-function goBack() {
-    window.location.href = '../index.html';
-}
-
-// Form submission handling
+// Login Form Handler
 document.addEventListener('DOMContentLoaded', function () {
-    const loginForm = document.querySelector('.login-form');
+    const loginForm = document.getElementById('login-form');
+    const backLink = document.getElementById('back-link');
+    const forgotPasswordLink = document.getElementById('forgot-password');
+    const supportLink = document.getElementById('support-link');
 
+    // Handle form submission
     if (loginForm) {
         loginForm.addEventListener('submit', function (e) {
             e.preventDefault();
 
-            // Get form data
-            const email = this.querySelector('input[type="email"]').value;
-            const password = this.querySelector('input[type="password"]').value;
-            const rememberMe = this.querySelector('input[type="checkbox"]').checked;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const remember = document.getElementById('remember').checked;
 
-            // Basic validation
-            if (!email || !password) {
-                alert('Please fill in all required fields');
-                return;
+            // Get the role type from the page title
+            const pageTitle = document.title;
+            let role = 'Student';
+            if (pageTitle.includes('Admin')) {
+                role = 'Admin';
+            } else if (pageTitle.includes('Teacher')) {
+                role = 'Teacher';
             }
 
-            // Determine user role from current page
-            const currentPage = window.location.pathname;
-            let userRole = '';
+            // For demonstration purposes, show an alert
+            // In production, this would make an API call to authenticate
+            console.log('Login attempt:', {
+                role: role,
+                email: email,
+                password: password,
+                remember: remember
+            });
 
-            if (currentPage.includes('admin-login.html')) {
-                userRole = 'admin';
-            } else if (currentPage.includes('teacher-login.html')) {
-                userRole = 'teacher';
-            } else if (currentPage.includes('student-login.html')) {
-                userRole = 'student';
-            }
+            // Show loading state
+            const submitBtn = loginForm.querySelector('.submit-btn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Logging in...';
+            submitBtn.disabled = true;
 
-            // Simulate login process with role-based redirection
-            simulateLogin(email, password, rememberMe, userRole);
+            // Simulate authentication
+            setTimeout(() => {
+                // Create session in localStorage
+                if (role === 'Admin') {
+                    const adminSession = {
+                        isLoggedIn: true,
+                        adminName: email.split('@')[0],
+                        loginTime: new Date().toISOString()
+                    };
+                    localStorage.setItem('adminSession', JSON.stringify(adminSession));
+                    // Redirect to admin dashboard
+                    window.location.href = '../Admin/admin-dashboard.html';
+                } else if (role === 'Teacher') {
+                    // For teacher login (to be implemented later)
+                    alert(`Login successful! Welcome, ${role}.\n\nEmail: ${email}\n\nTeacher dashboard coming soon!`);
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                } else {
+                    // For student login (to be implemented later)
+                    alert(`Login successful! Welcome, ${role}.\n\nEmail: ${email}\n\nStudent dashboard coming soon!`);
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
+            }, 1500);
         });
     }
-});
 
-function simulateLogin(email, password, rememberMe, userRole) {
-    // Show loading state
-    const submitBtn = document.querySelector('.submit-btn');
-    const originalText = submitBtn.textContent;
-    submitBtn.textContent = 'Logging in...';
-    submitBtn.disabled = true;
-
-    // Simulate API call
-    setTimeout(() => {
-        // For demo purposes, always succeed
-        console.log(`Login successful for ${userRole}: ${email}`);
-
-        // Store user session data
-        if (rememberMe) {
-            localStorage.setItem('userEmail', email);
-            localStorage.setItem('userRole', userRole);
-            localStorage.setItem('rememberMe', 'true');
-        } else {
-            sessionStorage.setItem('userEmail', email);
-            sessionStorage.setItem('userRole', userRole);
-        }
-
-        // Redirect to appropriate dashboard based on role
-        redirectToDashboard(userRole);
-
-    }, 1500);
-}
-
-function redirectToDashboard(userRole) {
-    const dashboardPages = {
-        'admin': '../Admin/admin-dashboard.html',
-        'teacher': '../Teacher/teacher-dashboard.html',
-        'student': '../Student/student-dashboard.html'
-    };
-
-    const dashboardPage = dashboardPages[userRole];
-
-    if (dashboardPage) {
-        window.location.href = dashboardPage;
-    } else {
-        console.error('Invalid user role for redirection');
-        alert('Error: Unable to determine user role for redirection');
+    // Handle back link with smooth transition
+    if (backLink) {
+        backLink.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+                window.location.href = '../index.html';
+            }, 300);
+        });
     }
-}
 
-// Check if user is already logged in and redirect accordingly
-function checkExistingLogin() {
-    const userRole = localStorage.getItem('userRole') || sessionStorage.getItem('userRole');
-    const userEmail = localStorage.getItem('userEmail') || sessionStorage.getItem('userEmail');
-
-    if (userRole && userEmail) {
-        // User is already logged in, redirect to dashboard
-        redirectToDashboard(userRole);
+    // Handle forgot password link
+    if (forgotPasswordLink) {
+        forgotPasswordLink.addEventListener('click', function (e) {
+            e.preventDefault();
+            alert('Password reset functionality would be implemented here.\n\nYou would receive an email with instructions to reset your password.');
+        });
     }
-}
 
-// Auto-redirect if user is already logged in (optional)
-// Uncomment the line below if you want automatic redirection
-// document.addEventListener('DOMContentLoaded', checkExistingLogin);
+    // Handle support link
+    if (supportLink) {
+        supportLink.addEventListener('click', function (e) {
+            e.preventDefault();
+            alert('Contact Support:\n\nEmail: support@studentportal.com\nPhone: +1 (555) 123-4567\n\nSupport hours: Monday-Friday, 9am-5pm');
+        });
+    }
 
-// Add input animations
-document.addEventListener('DOMContentLoaded', function () {
-    const inputs = document.querySelectorAll('input');
-
+    // Add input validation feedback
+    const inputs = document.querySelectorAll('.form-input');
     inputs.forEach(input => {
-        input.addEventListener('focus', function () {
-            this.parentElement.style.transform = 'scale(1.02)';
+        input.addEventListener('blur', function () {
+            if (this.value.trim() === '' && this.hasAttribute('required')) {
+                this.style.borderColor = '#E53935';
+            } else if (this.type === 'email' && this.value.trim() !== '') {
+                // Basic email validation
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailPattern.test(this.value)) {
+                    this.style.borderColor = '#E53935';
+                } else {
+                    this.style.borderColor = '#4CAF50';
+                }
+            } else if (this.value.trim() !== '') {
+                this.style.borderColor = '#4CAF50';
+            }
         });
 
-        input.addEventListener('blur', function () {
-            this.parentElement.style.transform = 'scale(1)';
+        input.addEventListener('focus', function () {
+            this.style.borderColor = '#1D88E5';
         });
     });
 
-    // Pre-fill email if remembered
-    const rememberedEmail = localStorage.getItem('userEmail');
-    const rememberMeChecked = localStorage.getItem('rememberMe') === 'true';
-
-    if (rememberedEmail && rememberMeChecked) {
-        const emailInput = document.querySelector('input[type="email"]');
-        const rememberCheckbox = document.querySelector('input[type="checkbox"]');
-
-        if (emailInput) emailInput.value = rememberedEmail;
-        if (rememberCheckbox) rememberCheckbox.checked = true;
-    }
+    // Add smooth page transitions
+    document.body.style.opacity = '0';
+    setTimeout(() => {
+        document.body.style.transition = 'opacity 0.3s ease';
+        document.body.style.opacity = '1';
+    }, 100);
 });
-
-// Logout function (to be used in dashboard pages)
-function logout() {
-    // Clear all stored data
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('rememberMe');
-    sessionStorage.removeItem('userEmail');
-    sessionStorage.removeItem('userRole');
-
-    // Redirect to role selection page
-    window.location.href = 'index.html';
-}
