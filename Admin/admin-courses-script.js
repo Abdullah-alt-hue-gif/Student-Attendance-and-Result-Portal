@@ -1,487 +1,692 @@
-// admin-courses-script.js
+// ========================================
+// Shared Data Management (Embedded)
+// ========================================
 
-// Global variables
-let courses = [];
-let teachers = [];
-let currentPage = 1;
-const coursesPerPage = 10;
-let currentEditId = null;
-let currentDeleteId = null;
-let filteredCourses = [];
-
-// Sample initial data
-const initialCourses = [
-    {
-        id: 1,
-        name: 'Computer Science 101',
-        code: 'CS101',
-        teacherId: 1,
-        teacherName: 'John Smith',
-        description: 'Introduction to computer science and programming',
-        credits: 4,
-        duration: 15,
-        students: 45,
-        status: 'active',
-        createdAt: '2024-01-10'
-    },
-    {
-        id: 2,
-        name: 'Mathematics 201',
-        code: 'MATH201',
-        teacherId: 3,
-        teacherName: 'Mike Wilson',
-        description: 'Advanced mathematics and calculus',
-        credits: 3,
-        duration: 15,
-        students: 38,
-        status: 'active',
-        createdAt: '2024-01-12'
-    },
-    {
-        id: 3,
-        name: 'Physics 301',
-        code: 'PHY301',
-        teacherId: 4,
-        teacherName: 'Lisa Anderson',
-        description: 'Classical mechanics and thermodynamics',
-        credits: 4,
-        duration: 16,
-        students: 32,
-        status: 'active',
-        createdAt: '2024-01-15'
-    },
-    {
-        id: 4,
-        name: 'Chemistry 102',
-        code: 'CHEM102',
-        teacherId: 1,
-        teacherName: 'John Smith',
-        description: 'Organic chemistry and laboratory techniques',
-        credits: 3,
-        duration: 14,
-        students: 41,
-        status: 'active',
-        createdAt: '2024-02-01'
-    },
-    {
-        id: 5,
-        name: 'English Literature',
-        code: 'ENG201',
-        teacherId: 4,
-        teacherName: 'Lisa Anderson',
-        description: 'Classic and contemporary English literature',
-        credits: 3,
-        duration: 15,
-        students: 29,
-        status: 'inactive',
-        createdAt: '2024-01-20'
-    }
-];
-
-// Initialize the page
-document.addEventListener('DOMContentLoaded', function () {
-    checkUserSession();
-    initializeCoursesPage();
-    loadCourses();
-});
-
-function checkUserSession() {
-    const userRole = localStorage.getItem('userRole') || sessionStorage.getItem('userRole');
-
-    if (!userRole || userRole !== 'admin') {
-        alert('Please login as admin first');
-        window.location.href = 'admin-login.html';
-        return;
+class DataManager {
+    constructor() {
+        this.initializeData();
     }
 
-    // Update admin name - use userName from login, fallback to email
-    const userName = localStorage.getItem('userName') || sessionStorage.getItem('userName');
-    const userEmail = localStorage.getItem('userEmail') || sessionStorage.getItem('userEmail');
-    const displayName = userName || (userEmail ? userEmail.split('@')[0] : 'Admin');
+    initializeData() {
+        // Initialize with sample data if empty
+        if (!localStorage.getItem('users')) {
+            const sampleUsers = [
+                {
+                    id: 1,
+                    name: 'John Smith',
+                    email: 'john.smith@portal.com',
+                    role: 'Teacher',
+                    status: 'Active',
+                    joinDate: '2024-09-01'
+                },
+                {
+                    id: 2,
+                    name: 'Sarah Johnson',
+                    email: 'sarah.j@portal.com',
+                    role: 'Student',
+                    status: 'Active',
+                    joinDate: '2025-11-10'
+                },
+                {
+                    id: 3,
+                    name: 'Mike Wilson',
+                    email: 'mike.w@portal.com',
+                    role: 'Teacher',
+                    status: 'Active',
+                    joinDate: '2024-08-15'
+                },
+                {
+                    id: 4,
+                    name: 'Emily Brown',
+                    email: 'emily.b@portal.com',
+                    role: 'Student',
+                    status: 'Active',
+                    joinDate: '2025-11-08'
+                },
+                {
+                    id: 5,
+                    name: 'David Lee',
+                    email: 'david.l@portal.com',
+                    role: 'Student',
+                    status: 'Inactive',
+                    joinDate: '2025-10-20'
+                },
+                {
+                    id: 6,
+                    name: 'Lisa Anderson',
+                    email: 'lisa.a@portal.com',
+                    role: 'Teacher',
+                    status: 'Active',
+                    joinDate: '2024-09-05'
+                }
+            ];
+            localStorage.setItem('users', JSON.stringify(sampleUsers));
+        }
 
-    if (document.getElementById('adminUserName')) {
-        document.getElementById('adminUserName').textContent = displayName;
-    }
-}
 
-function initializeCoursesPage() {
-    // Load courses from localStorage or use initial data
-    const savedCourses = localStorage.getItem('portalCourses');
-    const savedUsers = localStorage.getItem('portalUsers');
+        // Initialize courses - check if empty or less than 8
+        const existingCourses = JSON.parse(localStorage.getItem('courses') || '[]');
+        if (existingCourses.length < 8) {
+            const sampleCourses = [
+                {
+                    id: 1,
+                    name: 'Computer Science 101',
+                    code: 'CS101',
+                    teacher: 'John Smith',
+                    students: 45,
+                    status: 'Active',
+                    description: 'Introduction to Computer Science'
+                },
+                {
+                    id: 2,
+                    name: 'Mathematics 201',
+                    code: 'MATH201',
+                    teacher: 'Mike Wilson',
+                    students: 38,
+                    status: 'Active',
+                    description: 'Advanced Mathematics'
+                },
+                {
+                    id: 3,
+                    name: 'Physics 301',
+                    code: 'PHY301',
+                    teacher: 'Lisa Anderson',
+                    students: 32,
+                    status: 'Active',
+                    description: 'Advanced Physics'
+                },
+                {
+                    id: 4,
+                    name: 'Chemistry 102',
+                    code: 'CHEM102',
+                    teacher: 'John Smith',
+                    students: 41,
+                    status: 'Active',
+                    description: 'General Chemistry'
+                },
+                {
+                    id: 5,
+                    name: 'English Literature',
+                    code: 'ENG201',
+                    teacher: 'Lisa Anderson',
+                    students: 29,
+                    status: 'Active',
+                    description: 'English Literature and Composition'
+                },
+                {
+                    id: 6,
+                    name: 'Biology 101',
+                    code: 'BIO101',
+                    teacher: 'Mike Wilson',
+                    students: 35,
+                    status: 'Active',
+                    description: 'Introduction to Biology'
+                },
+                {
+                    id: 7,
+                    name: 'History 201',
+                    code: 'HIST201',
+                    teacher: 'John Smith',
+                    students: 28,
+                    status: 'Active',
+                    description: 'World History'
+                },
+                {
+                    id: 8,
+                    name: 'Art and Design',
+                    code: 'ART101',
+                    teacher: 'Lisa Anderson',
+                    students: 22,
+                    status: 'Active',
+                    description: 'Introduction to Art and Design'
+                }
+            ];
+            localStorage.setItem('courses', JSON.stringify(sampleCourses));
+            console.log('✅ Initialized 8 courses in localStorage');
+        } else {
+            console.log(`ℹ️ Courses already exist (${existingCourses.length} courses)`);
+        }
 
-    if (savedCourses) {
-        courses = JSON.parse(savedCourses);
-    } else {
-        courses = [...initialCourses];
-        saveCourses();
-    }
+        if (!localStorage.getItem('attendanceAlerts')) {
+            const sampleAlerts = [
+                {
+                    id: 1,
+                    studentName: 'David Lee',
+                    course: 'Computer Science 101',
+                    attendance: 45,
+                    status: 'Critical'
+                },
+                {
+                    id: 2,
+                    studentName: 'Emily Brown',
+                    course: 'Mathematics 201',
+                    attendance: 62,
+                    status: 'Warning'
+                },
+                {
+                    id: 3,
+                    studentName: 'Sarah Johnson',
+                    course: 'Physics 301',
+                    attendance: 58,
+                    status: 'Warning'
+                }
+            ];
+            localStorage.setItem('attendanceAlerts', JSON.stringify(sampleAlerts));
+        }
 
-    // Load teachers from users
-    if (savedUsers) {
-        const allUsers = JSON.parse(savedUsers);
-        teachers = allUsers.filter(user => user.role === 'teacher');
-    } else {
-        // Fallback teachers
-        teachers = [
-            { id: 1, name: 'John Smith', email: 'john.smith@portal.com' },
-            { id: 3, name: 'Mike Wilson', email: 'mike.w@portal.com' },
-            { id: 4, name: 'Lisa Anderson', email: 'lisa.a@portal.com' }
-        ];
-    }
-
-    filteredCourses = [...courses];
-
-    // Setup search functionality
-    const searchInput = document.getElementById('courseSearch');
-    searchInput.addEventListener('input', function () {
-        searchCourses();
-    });
-
-    // Setup form submission
-    document.getElementById('courseForm').addEventListener('submit', handleCourseFormSubmit);
-
-    // Load teachers dropdown
-    loadTeachersDropdown();
-
-    // Render initial table
-    renderCoursesTable();
-}
-
-function loadTeachersDropdown() {
-    const teacherSelect = document.getElementById('courseTeacher');
-    teacherSelect.innerHTML = '<option value="">Select Teacher</option>';
-
-    teachers.forEach(teacher => {
-        const option = document.createElement('option');
-        option.value = teacher.id;
-        option.textContent = teacher.name;
-        teacherSelect.appendChild(option);
-    });
-}
-
-function loadCourses() {
-    console.log('Loading courses...');
-}
-
-function saveCourses() {
-    localStorage.setItem('portalCourses', JSON.stringify(courses));
-}
-
-function renderCoursesTable() {
-    const tableBody = document.getElementById('coursesTableBody');
-    const startIndex = (currentPage - 1) * coursesPerPage;
-    const endIndex = startIndex + coursesPerPage;
-    const coursesToShow = filteredCourses.slice(startIndex, endIndex);
-
-    tableBody.innerHTML = '';
-
-    if (coursesToShow.length === 0) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="8" style="text-align: center; padding: 40px; color: #7f8c8d;">
-                    No courses found. <a href="javascript:void(0)" onclick="openAddCourseModal()">Add the first course</a>
-                </td>
-            </tr>
-        `;
-        return;
-    }
-
-    coursesToShow.forEach((course, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${index + 1 + ((currentPage - 1) * coursesPerPage)}</td>
-            <td>
-                <strong>${course.name}</strong>
-                ${course.description ? `<br><small style="color: #7f8c8d;">${course.description}</small>` : ''}
-            </td>
-            <td><code>${course.code}</code></td>
-            <td>${course.teacherName}</td>
-            <td>
-                <span class="student-count">${course.students}</span>
-                <button class="view-students-btn" onclick="viewCourseStudents(${course.id})" title="View Students">👥</button>
-            </td>
-            <td><span class="status-badge ${course.status}">${course.status.charAt(0).toUpperCase() + course.status.slice(1)}</span></td>
-            <td>${formatDate(course.createdAt)}</td>
-            <td>
-                <div class="action-buttons">
-                    <button class="view-btn" onclick="viewCourse(${course.id})" title="View Details">👁️</button>
-                    <button class="edit-btn" onclick="editCourse(${course.id})" title="Edit Course">✏️</button>
-                    <button class="delete-btn" onclick="deleteCourse(${course.id})" title="Delete Course">🗑️</button>
-                </div>
-            </td>
-        `;
-        tableBody.appendChild(row);
-    });
-
-    updatePagination();
-}
-
-function updatePagination() {
-    const totalPages = Math.ceil(filteredCourses.length / coursesPerPage);
-    const pageInfo = document.getElementById('pageInfo');
-    const prevBtn = document.getElementById('prevPage');
-    const nextBtn = document.getElementById('nextPage');
-
-    pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
-    prevBtn.disabled = currentPage === 1;
-    nextBtn.disabled = currentPage === totalPages || totalPages === 0;
-}
-
-function changePage(direction) {
-    const totalPages = Math.ceil(filteredCourses.length / coursesPerPage);
-    const newPage = currentPage + direction;
-
-    if (newPage >= 1 && newPage <= totalPages) {
-        currentPage = newPage;
-        renderCoursesTable();
-    }
-}
-
-// Search and Filter Functions
-function searchCourses() {
-    const query = document.getElementById('courseSearch').value.toLowerCase().trim();
-
-    if (query === '') {
-        filteredCourses = [...courses];
-    } else {
-        filteredCourses = courses.filter(course =>
-            course.name.toLowerCase().includes(query) ||
-            course.code.toLowerCase().includes(query) ||
-            course.teacherName.toLowerCase().includes(query) ||
-            course.description?.toLowerCase().includes(query)
-        );
-    }
-
-    currentPage = 1;
-    renderCoursesTable();
-}
-
-// Modal Management Functions
-function openAddCourseModal() {
-    const modal = document.getElementById('courseModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const submitBtn = document.getElementById('modalSubmitBtn');
-
-    modalTitle.textContent = 'Add New Course';
-    submitBtn.textContent = 'Add Course';
-
-    document.getElementById('courseForm').reset();
-    document.getElementById('courseId').value = '';
-    document.getElementById('courseCredits').value = '3';
-    document.getElementById('courseDuration').value = '15';
-    document.getElementById('courseStatus').value = 'active';
-
-    modal.style.display = 'block';
-}
-
-function editCourse(courseId) {
-    const course = courses.find(c => c.id === courseId);
-    if (!course) {
-        showToast('Course not found!', 'error');
-        return;
+        if (!localStorage.getItem('attendanceTrends')) {
+            const trends = [
+                { month: 'Jan', percentage: 85 },
+                { month: 'Feb', percentage: 82 },
+                { month: 'Mar', percentage: 88 },
+                { month: 'Apr', percentage: 86 },
+                { month: 'May', percentage: 90 },
+                { month: 'Jun', percentage: 87 }
+            ];
+            localStorage.setItem('attendanceTrends', JSON.stringify(trends));
+        }
     }
 
-    const modal = document.getElementById('courseModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const submitBtn = document.getElementById('modalSubmitBtn');
+    // Users CRUD
+    getUsers() {
+        return JSON.parse(localStorage.getItem('users')) || [];
+    }
 
-    modalTitle.textContent = 'Edit Course';
-    submitBtn.textContent = 'Update Course';
+    addUser(user) {
+        const users = this.getUsers();
+        user.id = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
+        user.joinDate = new Date().toISOString().split('T')[0];
+        if (!user.status) user.status = 'Active';
+        users.push(user);
+        localStorage.setItem('users', JSON.stringify(users));
+        return user;
+    }
 
-    // Fill form with course data
-    document.getElementById('courseId').value = course.id;
-    document.getElementById('courseName').value = course.name;
-    document.getElementById('courseCode').value = course.code;
-    document.getElementById('courseTeacher').value = course.teacherId;
-    document.getElementById('courseDescription').value = course.description || '';
-    document.getElementById('courseCredits').value = course.credits;
-    document.getElementById('courseDuration').value = course.duration;
-    document.getElementById('courseStatus').value = course.status;
+    updateUser(id, updatedData) {
+        const users = this.getUsers();
+        const index = users.findIndex(u => u.id === id);
+        if (index !== -1) {
+            users[index] = { ...users[index], ...updatedData };
+            localStorage.setItem('users', JSON.stringify(users));
+            return users[index];
+        }
+        return null;
+    }
 
-    currentEditId = courseId;
-    modal.style.display = 'block';
-}
+    deleteUser(id) {
+        const users = this.getUsers();
+        const filtered = users.filter(u => u.id !== id);
+        localStorage.setItem('users', JSON.stringify(filtered));
+    }
 
-function viewCourse(courseId) {
-    const course = courses.find(c => c.id === courseId);
-    if (course) {
-        alert(`Course Details:\n\nName: ${course.name}\nCode: ${course.code}\nTeacher: ${course.teacherName}\nDescription: ${course.description}\nCredits: ${course.credits}\nDuration: ${course.duration} weeks\nStudents: ${course.students}\nStatus: ${course.status}\nCreated: ${formatDate(course.createdAt)}`);
+    // Courses CRUD
+    getCourses() {
+        const coursesData = localStorage.getItem('courses');
+        console.log('Raw courses from localStorage:', coursesData);
+        const courses = JSON.parse(coursesData) || [];
+        console.log('Parsed courses:', courses);
+        return courses;
+    }
+
+    addCourse(course) {
+        const courses = this.getCourses();
+        course.id = courses.length > 0 ? Math.max(...courses.map(c => c.id)) + 1 : 1;
+        course.students = 0;
+        course.status = 'Active';
+        courses.push(course);
+        localStorage.setItem('courses', JSON.stringify(courses));
+        console.log('Added course:', course);
+        return course;
+    }
+
+    updateCourse(id, updatedData) {
+        const courses = this.getCourses();
+        const index = courses.findIndex(c => c.id === id);
+        if (index !== -1) {
+            courses[index] = { ...courses[index], ...updatedData };
+            localStorage.setItem('courses', JSON.stringify(courses));
+            return courses[index];
+        }
+        return null;
+    }
+
+    deleteCourse(id) {
+        const courses = this.getCourses();
+        const filtered = courses.filter(c => c.id !== id);
+        localStorage.setItem('courses', JSON.stringify(filtered));
+    }
+
+    // Attendance Alerts
+    getAttendanceAlerts() {
+        return JSON.parse(localStorage.getItem('attendanceAlerts')) || [];
+    }
+
+    getAttendanceTrends() {
+        return JSON.parse(localStorage.getItem('attendanceTrends')) || [];
     }
 }
 
-function viewCourseStudents(courseId) {
-    const course = courses.find(c => c.id === courseId);
-    if (course) {
-        alert(`Course: ${course.name}\n\nTotal Students: ${course.students}\n\nThis would open A detailed student list in a real application.`);
-    }
-}
-
-function deleteCourse(courseId) {
-    const course = courses.find(c => c.id === courseId);
-    if (!course) {
-        showToast('Course not found!', 'error');
-        return;
+// Toast Notification System
+function showToast(message, type = 'success') {
+    // Create toast container if it doesn't exist
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
     }
 
-    currentDeleteId = courseId;
-    document.getElementById('deleteMessage').textContent = `Are you sure you want to delete course "${course.name}" (${course.code})? This action cannot be undone.`;
-    document.getElementById('deleteModal').style.display = 'block';
-}
-
-function confirmDelete() {
-    if (currentDeleteId === null) return;
-
-    courses = courses.filter(course => course.id !== currentDeleteId);
-    filteredCourses = filteredCourses.filter(course => course.id !== currentDeleteId);
-
-    saveCourses();
-    renderCoursesTable();
-    showToast('Course deleted successfully!', 'success');
-    closeDeleteModal();
-}
-
-// Form Handling
-function handleCourseFormSubmit(e) {
-    e.preventDefault();
-
-    const teacherId = parseInt(document.getElementById('courseTeacher').value);
-    const teacher = teachers.find(t => t.id === teacherId);
-
-    const formData = {
-        id: document.getElementById('courseId').value ? parseInt(document.getElementById('courseId').value) : generateCourseId(),
-        name: document.getElementById('courseName').value.trim(),
-        code: document.getElementById('courseCode').value.trim().toUpperCase(),
-        teacherId: teacherId,
-        teacherName: teacher ? teacher.name : 'Unknown',
-        description: document.getElementById('courseDescription').value.trim(),
-        credits: parseInt(document.getElementById('courseCredits').value),
-        duration: parseInt(document.getElementById('courseDuration').value),
-        students: currentEditId ? courses.find(c => c.id === currentEditId).students : 0,
-        status: document.getElementById('courseStatus').value,
-        createdAt: currentEditId ? courses.find(c => c.id === currentEditId).createdAt : new Date().toISOString().split('T')[0]
+    // Toast icons
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-times-circle',
+        warning: 'fa-exclamation-circle',
+        info: 'fa-info-circle'
     };
 
-    // Validation
-    if (!validateCourseForm(formData)) {
-        return;
-    }
-
-    // Check for duplicate code (excluding current course in edit mode)
-    const existingCourse = courses.find(c => c.code === formData.code && c.id !== formData.id);
-    if (existingCourse) {
-        showToast('A course with this code already exists!', 'error');
-        return;
-    }
-
-    if (currentEditId) {
-        // Update existing course
-        const index = courses.findIndex(c => c.id === currentEditId);
-        if (index !== -1) {
-            courses[index] = { ...courses[index], ...formData };
-            showToast('Course updated successfully!', 'success');
-        }
-    } else {
-        // Add new course
-        courses.push(formData);
-        showToast('Course added successfully!', 'success');
-    }
-
-    saveCourses();
-    filteredCourses = [...courses];
-    renderCoursesTable();
-    closeCourseModal();
-}
-
-function validateCourseForm(formData) {
-    if (formData.name.length < 3) {
-        showToast('Course name must be at least 3 characters long!', 'error');
-        return false;
-    }
-
-    if (formData.code.length < 2) {
-        showToast('Course code must be at least 2 characters long!', 'error');
-        return false;
-    }
-
-    if (!formData.teacherId) {
-        showToast('Please select a teacher!', 'error');
-        return false;
-    }
-
-    if (formData.credits < 1 || formData.credits > 6) {
-        showToast('Credits must be between 1 and 6!', 'error');
-        return false;
-    }
-
-    if (formData.duration < 1 || formData.duration > 20) {
-        showToast('Duration must be between 1 and 20 weeks!', '  error  ');
-        return false;
-    }
-
-    return true;
-}
-
-// Utility Functions
-function generateCourseId() {
-    const maxId = courses.reduce((max, course) => Math.max(max, course.id), 0);
-    return maxId + 1;
-}
-
-function formatDate(dateString) {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
-}
-
-function closeCourseModal() {
-    document.getElementById('courseModal').style.display = 'none';
-    currentEditId = null;
-    document.getElementById('courseForm').reset();
-}
-
-function closeDeleteModal() {
-    document.getElementById('deleteModal').style.display = 'none';
-    currentDeleteId = null;
-}
-
-function showToast(message, type = 'info') {
+    // Create toast element
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    toast.textContent = message;
+    toast.innerHTML = `
+        <div class="toast-icon">
+            <i class="fas ${icons[type] || icons.success}"></i>
+        </div>
+        <div class="toast-content">
+            <div class="toast-message">${message}</div>
+        </div>
+        <button class="toast-close">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
 
-    document.body.appendChild(toast);
+    // Add to container
+    container.appendChild(toast);
 
-    setTimeout(() => toast.classList.add('show'), 100);
+    // Close button handler
+    const closeBtn = toast.querySelector('.toast-close');
+    closeBtn.addEventListener('click', () => {
+        removeToast(toast);
+    });
 
+    // Auto remove after 3 seconds
     setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toast.parentNode.removeChild(toast);
-            }
-        }, 300);
+        removeToast(toast);
     }, 3000);
 }
 
-// Close modals when clicking outside
-window.onclick = function (event) {
-    const modals = document.querySelectorAll('.modal');
-    modals.forEach(modal => {
-        if (event.target === modal) {
-            if (modal.id === 'courseModal') closeCourseModal();
-            if (modal.id === 'deleteModal') closeDeleteModal();
+function removeToast(toast) {
+    toast.classList.add('removing');
+    setTimeout(() => {
+        toast.remove();
+    }, 300);
+}
+
+// Shared UI Logic
+function checkAdminSession() {
+    const session = JSON.parse(localStorage.getItem('adminSession') || '{}');
+    if (!session.isLoggedIn) {
+        window.location.href = '../login/admin-login.html';
+        return;
+    }
+
+    // Display admin name if element exists
+    const adminNameEl = document.getElementById('adminName');
+    if (adminNameEl) {
+        adminNameEl.textContent = session.adminName || 'Admin User';
+    }
+}
+
+function setupSidebar() {
+    // Mobile menu toggle
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    if (menuToggle && sidebar) {
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+    }
+
+    // Logout
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('adminSession');
+                window.location.href = '../login/admin-login.html';
+            }
+        });
+    }
+
+    // Highlight active nav item
+    const currentPage = window.location.pathname.split('/').pop();
+    document.querySelectorAll('.nav-item').forEach(item => {
+        const href = item.getAttribute('href');
+        if (href === currentPage || (currentPage === 'manage-courses.html' && href === 'manage-courses.html')) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
         }
     });
-};
+}
 
-// Keyboard shortcuts
-document.addEventListener('keydown', function (e) {
-    if (e.ctrlKey && e.key === 'n') {
+// Notification Dropdown System
+function setupNotificationDropdown() {
+    const notificationIcon = document.querySelector('.notification-icon');
+    if (!notificationIcon) return;
+
+    // Create dropdown HTML if it doesn't exist
+    let dropdown = document.getElementById('notificationDropdown');
+    if (!dropdown) {
+        dropdown = document.createElement('div');
+        dropdown.id = 'notificationDropdown';
+        dropdown.className = 'notification-dropdown';
+        notificationIcon.appendChild(dropdown);
+    }
+
+    // Toggle dropdown on bell icon click
+    notificationIcon.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('active');
+        if (dropdown.classList.contains('active')) {
+            populateNotifications();
+        }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!notificationIcon.contains(e.target)) {
+            dropdown.classList.remove('active');
+        }
+    });
+}
+
+function populateNotifications() {
+    const dropdown = document.getElementById('notificationDropdown');
+    if (!dropdown) return;
+
+    const dataManager = new DataManager();
+    const alerts = dataManager.getAttendanceAlerts();
+
+    // Build notification HTML
+    const notificationsHTML = `
+        <div class="notification-header">
+            <h3>Notifications</h3>
+            <button class="mark-all-read" onclick="markAllNotificationsRead()">Mark all read</button>
+        </div>
+        <div class="notification-list">
+            ${alerts.length > 0 ? alerts.map(alert => `
+                <div class="notification-item ${alert.read ? '' : 'unread'}" data-id="${alert.id}">
+                    <div class="notification-icon-wrapper ${alert.status.toLowerCase()}">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-title">Low Attendance Alert</div>
+                        <div class="notification-message">${alert.studentName} - ${alert.course}: ${alert.attendance}% attendance</div>
+                        <div class="notification-time">2 hours ago</div>
+                    </div>
+                </div>
+            `).join('') : `
+                <div class="notification-empty">
+                    <i class="fas fa-bell-slash"></i>
+                    <p>No new notifications</p>
+                </div>
+            `}
+        </div>
+        ${alerts.length > 0 ? `
+            <div class="notification-footer">
+                <a href="#" class="view-all-notifications">View all notifications</a>
+            </div>
+        ` : ''}
+    `;
+
+    dropdown.innerHTML = notificationsHTML;
+}
+
+function markAllNotificationsRead() {
+    const items = document.querySelectorAll('.notification-item.unread');
+    items.forEach(item => item.classList.remove('unread'));
+    showToast('All notifications marked as read', 'success');
+}
+
+// ========================================
+// Courses Controller
+// ========================================
+
+class CoursesController {
+    constructor() {
+        this.dataManager = new DataManager();
+        this.currentPage = 1;
+        this.itemsPerPage = 10;
+        this.editingCourseId = null;
+        this.init();
+    }
+
+    init() {
+        console.log('CoursesController initializing...');
+        checkAdminSession();
+        setupSidebar();
+        setupNotificationDropdown();
+        this.setupEventListeners();
+        this.renderCoursesTable();
+
+        // Check for action parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('action') === 'add') {
+            this.openCourseModal();
+        }
+    }
+
+    setupEventListeners() {
+        // Add Course button
+        document.getElementById('addCourseModalBtn')?.addEventListener('click', () => this.openCourseModal());
+
+        // Modal controls
+        document.getElementById('closeCourseModal')?.addEventListener('click', () => this.closeCourseModal());
+        document.getElementById('cancelCourseBtn')?.addEventListener('click', () => this.closeCourseModal());
+
+        // Form submission
+        document.getElementById('courseForm')?.addEventListener('submit', (e) => this.handleCourseSubmit(e));
+
+        // Pagination
+        document.getElementById('prevPageBtn')?.addEventListener('click', () => this.changePage(-1));
+        document.getElementById('nextPageBtn')?.addEventListener('click', () => this.changePage(1));
+
+        // Close modal on outside click
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                this.closeCourseModal();
+            }
+        });
+    }
+
+    renderCoursesTable() {
+        const courses = this.dataManager.getCourses();
+        const tbody = document.getElementById('coursesTableBody');
+
+        console.log('Rendering courses table...');
+        console.log('Total courses found:', courses.length);
+        console.log('Courses data:', courses);
+
+        if (!tbody) {
+            console.error('coursesTableBody element not found!');
+            return;
+        }
+
+        // Calculate pagination
+        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+        const endIndex = startIndex + this.itemsPerPage;
+        const paginatedCourses = courses.slice(startIndex, endIndex);
+
+        console.log('Paginated courses:', paginatedCourses.length);
+
+        if (courses.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">No courses found. Click "Add Course" to create one.</td></tr>';
+            this.updatePagination(0);
+            return;
+        }
+
+        tbody.innerHTML = paginatedCourses.map(course => `
+            <tr>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-book" style="color: #4a90e2;"></i>
+                        <span>${course.name || 'Untitled Course'}</span>
+                    </div>
+                </td>
+                <td>${course.code || 'N/A'}</td>
+                <td>${course.teacher || 'Unassigned'}</td>
+                <td>${course.students || 0}</td>
+                <td>
+                    <span class="status-badge ${(course.status || 'active').toLowerCase()}">${course.status || 'Active'}</span>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="action-btn edit" onclick="coursesController.editCourse(${course.id})" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn delete" onclick="coursesController.deleteCourse(${course.id})" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+
+        this.updatePagination(courses.length);
+        console.log('Table rendered successfully');
+    }
+
+    updatePagination(totalItems) {
+        const totalPages = Math.ceil(totalItems / this.itemsPerPage);
+        const paginationInfo = document.getElementById('paginationInfo');
+        const paginationNumbers = document.getElementById('paginationNumbers');
+        const prevBtn = document.getElementById('prevPageBtn');
+        const nextBtn = document.getElementById('nextPageBtn');
+
+        if (paginationInfo) {
+            paginationInfo.textContent = `Showing ${totalItems} courses`;
+        }
+
+        if (prevBtn) {
+            prevBtn.disabled = this.currentPage === 1;
+        }
+
+        if (nextBtn) {
+            nextBtn.disabled = this.currentPage >= totalPages || totalPages === 0;
+        }
+
+        if (paginationNumbers) {
+            paginationNumbers.innerHTML = '';
+            for (let i = 1; i <= totalPages; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `pagination-btn ${i === this.currentPage ? 'active' : ''}`;
+                pageBtn.textContent = i;
+                pageBtn.addEventListener('click', () => {
+                    this.currentPage = i;
+                    this.renderCoursesTable();
+                });
+                paginationNumbers.appendChild(pageBtn);
+            }
+        }
+    }
+
+    changePage(direction) {
+        const courses = this.dataManager.getCourses();
+        const totalPages = Math.ceil(courses.length / this.itemsPerPage);
+
+        this.currentPage += direction;
+        if (this.currentPage < 1) this.currentPage = 1;
+        if (this.currentPage > totalPages) this.currentPage = totalPages;
+
+        this.renderCoursesTable();
+    }
+
+    openCourseModal(course = null) {
+        const modal = document.getElementById('courseModal');
+        const form = document.getElementById('courseForm');
+        const title = document.getElementById('courseModalTitle');
+
+        if (course) {
+            this.editingCourseId = course.id;
+            title.textContent = 'Edit Course';
+            document.getElementById('courseName').value = course.name;
+            document.getElementById('courseCode').value = course.code || '';
+            document.getElementById('courseDescription').value = course.description || '';
+
+            // Populate teacher dropdown and select current teacher
+            this.populateTeacherDropdown();
+            document.getElementById('courseTeacher').value = course.teacher;
+        } else {
+            this.editingCourseId = null;
+            title.textContent = 'Create New Course';
+            form.reset();
+            this.populateTeacherDropdown();
+        }
+
+        modal.classList.add('active');
+    }
+
+    closeCourseModal() {
+        document.getElementById('courseModal').classList.remove('active');
+        this.editingCourseId = null;
+    }
+
+    populateTeacherDropdown() {
+        const users = this.dataManager.getUsers();
+        const teachers = users.filter(u => u.role === 'Teacher');
+        const select = document.getElementById('courseTeacher');
+
+        if (!select) return;
+
+        select.innerHTML = '<option value="">Select a teacher</option>' +
+            teachers.map(t => `<option value="${t.name}">${t.name}</option>`).join('');
+    }
+
+    handleCourseSubmit(e) {
         e.preventDefault();
-        openAddCourseModal();
+
+        const courseData = {
+            name: document.getElementById('courseName').value,
+            code: document.getElementById('courseCode').value,
+            teacher: document.getElementById('courseTeacher').value,
+            description: document.getElementById('courseDescription').value
+        };
+
+        if (this.editingCourseId) {
+            // Update existing course
+            this.dataManager.updateCourse(this.editingCourseId, courseData);
+            showToast('Course updated successfully!', 'success');
+        } else {
+            // Add new course
+            this.dataManager.addCourse(courseData);
+            showToast('Course created successfully!', 'success');
+        }
+
+        this.closeCourseModal();
+        this.renderCoursesTable();
     }
 
-    if (e.key === 'Escape') {
-        closeCourseModal();
-        closeDeleteModal();
+    editCourse(id) {
+        const courses = this.dataManager.getCourses();
+        const course = courses.find(c => c.id === id);
+        if (course) {
+            this.openCourseModal(course);
+        }
     }
+
+    deleteCourse(id) {
+        if (confirm('Are you sure you want to delete this course?')) {
+            this.dataManager.deleteCourse(id);
+            this.renderCoursesTable();
+            showToast('Course deleted successfully!', 'success');
+        }
+    }
+}
+
+// Initialize controller
+let coursesController;
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing CoursesController...');
+    coursesController = new CoursesController();
 });
