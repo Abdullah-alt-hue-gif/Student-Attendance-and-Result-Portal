@@ -4,230 +4,326 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Portal - Reports</title>
+    <title>Reports - Admin Portal</title>
     <link rel="stylesheet" href="admin-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- PDF Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
 </head>
 
 <body>
-    <div class="admin-container">
-        <!-- Sidebar -->
-        <nav class="sidebar">
-            <div class="sidebar-header">
-                <h2>Admin Portal</h2>
-            </div>
-            <ul class="sidebar-menu">
-                <li class="menu-item"><a href="admin-dashboard.html">📊 Dashboard</a></li>
-                <li class="menu-item"><a href="admin-users.html">👥 Manage Users</a></li>
-                <li class="menu-item"><a href="admin-courses.html">📚 Manage Courses</a></li>
-                <li class="menu-item active"><a href="admin-reports.html">📈 Reports</a></li>
-                <li class="menu-item"><a href="admin-settings.html">⚙️ Settings</a></li>
-            </ul>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Admin Portal</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="admin-dashboard.html" class="nav-item active">
+                <i class="fas fa-th-large"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="admin-users.html" class="nav-item">
+                <i class="fas fa-users"></i>
+                <span>Manage Users</span>
+            </a>
+            <a href="admin-courses.html" class="nav-item">
+                <i class="fas fa-book"></i>
+                <span>Manage Courses</span>
+            </a>
+            <a href="admin-reports.html" class="nav-item">
+                <i class="fas fa-file-alt"></i>
+                <span>Reports</span>
+            </a>
+            <a href="admin-settings.html" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
         </nav>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Header -->
-            <header class="content-header">
-                <h1>Reports</h1>
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">AD</div>
                 <div class="user-info">
-                    <span id="adminUserName">Admin User</span>
-                    <div class="user-avatar">A</div>
-                </div>
-            </header>
-
-            <!-- Reports Section -->
-            <div class="reports-section">
-                <!-- Report Cards -->
-                <div class="reports-grid">
-                    <div class="report-card">
-                        <div class="report-icon">📊</div>
-                        <div class="report-info">
-                            <h3>Attendance Reports</h3>
-                            <div class="report-count" id="attendanceReportsCount">0</div>
-                            <p>Generated reports</p>
-                        </div>
-                        <button class="generate-btn" onclick="generateAttendanceReport()">
-                            Generate Report
-                        </button>
-                    </div>
-
-                    <div class="report-card">
-                        <div class="report-icon">📝</div>
-                        <div class="report-info">
-                            <h3>Result Reports</h3>
-                            <div class="report-count" id="resultReportsCount">0</div>
-                            <p>Generated reports</p>
-                        </div>
-                        <button class="generate-btn" onclick="generateResultReport()">
-                            Generate Report
-                        </button>
-                    </div>
-
-                    <div class="report-card">
-                        <div class="report-icon">📋</div>
-                        <div class="report-info">
-                            <h3>Custom Reports</h3>
-                            <div class="report-count" id="customReportsCount">0</div>
-                            <p>Generated reports</p>
-                        </div>
-                        <button class="generate-btn" onclick="generateCustomReport()">
-                            Generate Report
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Charts and Recent Reports -->
-                <div class="reports-content">
-                    <!-- Left Column -->
-                    <div class="reports-column">
-                        <!-- Attendance Chart -->
-                        <div class="chart-card">
-                            <h3>Attendance Overview by Course</h3>
-                            <div class="chart-container">
-                                <canvas id="attendanceOverviewChart"></canvas>
-                            </div>
-                        </div>
-
-                        <!-- Quick Stats -->
-                        <div class="stats-card">
-                            <h3>Quick Statistics</h3>
-                            <div class="stats-grid-mini">
-                                <div class="stat-mini">
-                                    <div class="stat-value" id="totalStudents">0</div>
-                                    <div class="stat-label">Total Students</div>
-                                </div>
-                                <div class="stat-mini">
-                                    <div class="stat-value" id="totalTeachers">0</div>
-                                    <div class="stat-label">Active Teachers</div>
-                                </div>
-                                <div class="stat-mini">
-                                    <div class="stat-value" id="totalCourses">0</div>
-                                    <div class="stat-label">Active Courses</div>
-                                </div>
-                                <div class="stat-mini">
-                                    <div class="stat-value" id="avgAttendance">0%</div>
-                                    <div class="stat-label">Avg Attendance</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Right Column -->
-                    <div class="reports-column">
-                        <!-- Recent Reports -->
-                        <div class="recent-reports-card">
-                            <div class="card-header">
-                                <div>
-                                    <h3>Recent Reports</h3>
-                                    <p>Download and view generated reports</p>
-                                </div>
-                                <button class="clear-reports-btn" onclick="clearAllReports()" title="Clear All Reports">
-                                    🗑️ Clear All
-                                </button>
-                            </div>
-
-                            <div class="reports-table">
-                                <table id="reportsTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Report Title</th>
-                                            <th>Type</th>
-                                            <th>Generated Date</th>
-                                            <th>Size</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="reportsTableBody">
-                                        <!-- Reports will be dynamically loaded here -->
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div class="table-footer">
-                                <span id="reportsCount">Showing 0 recent reports</span>
-                            </div>
-                        </div>
-
-                        <!-- Report Templates -->
-                        <div class="templates-card">
-                            <h3>Report Templates</h3>
-                            <div class="template-buttons">
-                                <button class="template-btn" onclick="useTemplate('weekly_attendance')">
-                                    📅 Weekly Attendance
-                                </button>
-                                <button class="template-btn" onclick="useTemplate('monthly_results')">
-                                    📊 Monthly Results
-                                </button>
-                                <button class="template-btn" onclick="useTemplate('student_performance')">
-                                    🎓 Student Performance
-                                </button>
-                                <button class="template-btn" onclick="useTemplate('teacher_efficiency')">
-                                    👩‍🏫 Teacher Efficiency
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="user-name" id="adminName">Admin User</div>
+                    <div class="user-role">Admin</div>
                 </div>
             </div>
-        </main>
+        </div>
     </div>
 
-    <!-- Generate Report Modal -->
-    <div id="generateReportModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle">Generate Report</h3>
-                <span class="close" onclick="closeReportModal()">&times;</span>
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title">Reports</h1>
             </div>
-            <form id="generateReportForm" class="modal-form">
-                <input type="hidden" id="reportType">
-                <div class="form-group">
-                    <label for="reportTitle">Report Title *</label>
-                    <input type="text" id="reportTitle" required placeholder="Enter report title">
+            <div class="header-right">
+                <div class="notification-icon">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationCount">3</span>
                 </div>
-                <div class="form-group">
-                    <label for="reportDateRange">Date Range *</label>
-                    <select id="reportDateRange" required>
-                        <option value="">Select Date Range</option>
-                        <option value="last_week">Last Week</option>
-                        <option value="last_month">Last Month</option>
-                        <option value="last_quarter">Last Quarter</option>
-                        <option value="custom">Custom Range</option>
-                    </select>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Reports Page Content -->
+        <div class="page" id="reportsPage">
+            <!-- Report Type Cards -->
+            <div class="reports-grid">
+                <!-- Attendance Reports Card -->
+                <div class="report-card">
+                    <div class="report-card-header">
+                        <div>
+                            <div class="report-card-title">Attendance Reports</div>
+                            <div class="report-card-count">45</div>
+                        </div>
+                        <div class="report-card-icon blue">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                    </div>
+                    <button class="generate-btn" onclick="openModal('attendanceModal')">Generate Report</button>
                 </div>
-                <div class="form-group" id="customDateRangeGroup" style="display: none;">
-                    <div class="date-inputs">
-                        <input type="date" id="startDate" placeholder="Start Date">
-                        <input type="date" id="endDate" placeholder="End Date">
+
+                <!-- Result Reports Card -->
+                <div class="report-card">
+                    <div class="report-card-header">
+                        <div>
+                            <div class="report-card-title">Result Reports</div>
+                            <div class="report-card-count">32</div>
+                        </div>
+                        <div class="report-card-icon green">
+                            <i class="fas fa-file-invoice"></i>
+                        </div>
+                    </div>
+                    <button class="generate-btn" onclick="openModal('resultsModal')">Generate Report</button>
+                </div>
+
+                <!-- Custom Reports Card -->
+                <div class="report-card">
+                    <div class="report-card-header">
+                        <div>
+                            <div class="report-card-title">Custom Reports</div>
+                            <div class="report-card-count">18</div>
+                        </div>
+                        <div class="report-card-icon orange">
+                            <i class="fas fa-download"></i>
+                        </div>
+                    </div>
+                    <button class="generate-btn" onclick="openModal('customModal')">Generate Report</button>
+                </div>
+            </div>
+
+            <!-- Attendance Overview Chart -->
+            <div class="card attendance-overview">
+                <div class="card-header">
+                    <h2>Attendance Overview by Course</h2>
+                </div>
+                <div class="chart-container wide">
+                    <div class="bar-chart" id="reportsChart">
+                        <div class="bar-wrapper">
+                            <div class="bar" style="height: 85%" data-value="85%"></div>
+                            <div class="bar-label">CS101</div>
+                        </div>
+                        <div class="bar-wrapper">
+                            <div class="bar" style="height: 82%" data-value="82%"></div>
+                            <div class="bar-label">MATH201</div>
+                        </div>
+                        <div class="bar-wrapper">
+                            <div class="bar" style="height: 88%" data-value="88%"></div>
+                            <div class="bar-label">PHY301</div>
+                        </div>
+                        <div class="bar-wrapper">
+                            <div class="bar" style="height: 86%" data-value="86%"></div>
+                            <div class="bar-label">CHEM102</div>
+                        </div>
+                        <div class="bar-wrapper">
+                            <div class="bar" style="height: 90%" data-value="90%"></div>
+                            <div class="bar-label">ENG201</div>
+                        </div>
+                    </div>
+                    <div class="chart-legend">
+                        <span class="legend-item"><span class="legend-color blue"></span>attendance</span>
                     </div>
                 </div>
+            </div>
+
+            <!-- Recent Reports Table -->
+            <div class="card recent-reports">
+                <div class="card-header">
+                    <div>
+                        <h2>Recent Reports</h2>
+                        <p class="subtitle">Download and view generated reports</p>
+                    </div>
+                    <button class="export-all-btn" id="exportAllBtn">
+                        <i class="fas fa-download"></i> Export All
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Report Title</th>
+                                <th>Type</th>
+                                <th>Generated Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportsTableBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-footer">
+                    Showing 4 recent reports
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+
+    <!-- Attendance Report Modal -->
+    <div class="modal" id="attendanceModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Generate Attendance Report</h2>
+                <span class="close-modal" onclick="closeModal('attendanceModal')">&times;</span>
+            </div>
+            <form id="attendanceReportForm">
                 <div class="form-group">
-                    <label for="reportFormat">Format *</label>
-                    <select id="reportFormat" required>
-                        <option value="pdf">PDF Document</option>
-                        <option value="excel">Excel Spreadsheet</option>
-                        <option value="csv">CSV File</option>
+                    <label>Report Title *</label>
+                    <input type="text" class="form-control" id="attReportTitle" value="Attendance Report - 11/27/2025">
+                </div>
+                <div class="form-group">
+                    <label>Date Range *</label>
+                    <select class="form-control" id="attDateRange">
+                        <option>Select Date Range</option>
+                        <option>Last 7 Days</option>
+                        <option>Last 30 Days</option>
+                        <option>This Month</option>
+                        <option>Last Month</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="includeCharts">
-                        <input type="checkbox" id="includeCharts" checked>
-                        Include Charts and Graphs
-                    </label>
+                    <label>Format *</label>
+                    <select class="form-control" id="attFormat">
+                        <option>PDF Document</option>
+                        <option>CSV</option>
+                        <option>Excel</option>
+                    </select>
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="attIncludeCharts" checked>
+                    <label for="attIncludeCharts">Include Charts and Graphs</label>
                 </div>
                 <div class="form-group">
-                    <label for="reportNotes">Notes (Optional)</label>
-                    <textarea id="reportNotes" rows="2" placeholder="Add any additional notes..."></textarea>
+                    <label>Notes (Optional)</label>
+                    <textarea class="form-control" id="attNotes" placeholder="Add any additional notes..."></textarea>
                 </div>
-                <div class="form-actions">
-                    <button type="button" class="cancel-btn" onclick="closeReportModal()">Cancel</button>
-                    <button type="submit" class="submit-btn">Generate Report</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeModal('attendanceModal')">Cancel</button>
+                    <button type="submit" class="btn-primary">Generate Report</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Results Report Modal -->
+    <div class="modal" id="resultsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Generate Results Report</h2>
+                <span class="close-modal" onclick="closeModal('resultsModal')">&times;</span>
+            </div>
+            <form id="resultsReportForm">
+                <div class="form-group">
+                    <label>Report Title *</label>
+                    <input type="text" class="form-control" id="resReportTitle" value="Results Analysis - 11/27/2025">
+                </div>
+                <div class="form-group">
+                    <label>Date Range *</label>
+                    <select class="form-control" id="resDateRange">
+                        <option>Select Date Range</option>
+                        <option>Last Semester</option>
+                        <option>Current Semester</option>
+                        <option>This Year</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Format *</label>
+                    <select class="form-control" id="resFormat">
+                        <option>PDF Document</option>
+                        <option>CSV</option>
+                        <option>Excel</option>
+                    </select>
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="resIncludeCharts" checked>
+                    <label for="resIncludeCharts">Include Charts and Graphs</label>
+                </div>
+                <div class="form-group">
+                    <label>Notes (Optional)</label>
+                    <textarea class="form-control" id="resNotes" placeholder="Add any additional notes..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeModal('resultsModal')">Cancel</button>
+                    <button type="submit" class="btn-primary">Generate Report</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Custom Report Modal -->
+    <div class="modal" id="customModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Generate Custom Report</h2>
+                <span class="close-modal" onclick="closeModal('customModal')">&times;</span>
+            </div>
+            <form id="customReportForm">
+                <div class="form-group">
+                    <label>Report Title *</label>
+                    <input type="text" class="form-control" id="custReportTitle" value="Custom Report - 11/27/2025">
+                </div>
+                <div class="form-group">
+                    <label>Date Range *</label>
+                    <select class="form-control" id="custDateRange">
+                        <option>Select Date Range</option>
+                        <option>Custom Range</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Format *</label>
+                    <select class="form-control" id="custFormat">
+                        <option>PDF Document</option>
+                        <option>CSV</option>
+                        <option>Excel</option>
+                    </select>
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="custIncludeCharts" checked>
+                    <label for="custIncludeCharts">Include Charts and Graphs</label>
+                </div>
+                <div class="form-group">
+                    <label>Notes (Optional)</label>
+                    <textarea class="form-control" id="custNotes" placeholder="Add any additional notes..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeModal('customModal')">Cancel</button>
+                    <button type="submit" class="btn-primary">Generate Report</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="admin-reports-script.js"></script>
 </body>
 
