@@ -50,16 +50,30 @@ document.addEventListener('DOMContentLoaded', function () {
                     localStorage.setItem('adminSession', JSON.stringify(adminSession));
                     // Redirect to admin dashboard
                     window.location.href = '../Admin/admin-dashboard.html';
-                } else if (role === 'Teacher') {
-                    // For teacher login (to be implemented later)
-                    alert(`Login successful! Welcome, ${role}.\n\nEmail: ${email}\n\nTeacher dashboard coming soon!`);
-                    submitBtn.textContent = originalText;
-                    submitBtn.disabled = false;
+                   } else if (role === 'Teacher') {
+                    // Find the teacher's full name from users data
+                    const users = JSON.parse(localStorage.getItem('users') || '[]');
+                    const teacher = users.find(u => u.email === email && u.role === 'Teacher');
+                    const teacherFullName = teacher ? teacher.name : email.split('@')[0];
+
+                    const teacherSession = {
+                        isLoggedIn: true,
+                        teacherName: teacherFullName,
+                        teacherEmail: email,
+                        loginTime: new Date().toISOString()
+                    };
+                    localStorage.setItem('teacherSession', JSON.stringify(teacherSession));
+                    // Redirect to teacher dashboard
+                    window.location.href = '../Teacher/teacher-dashboard.html';
                 } else {
-                    // For student login (to be implemented later)
-                    alert(`Login successful! Welcome, ${role}.\n\nEmail: ${email}\n\nStudent dashboard coming soon!`);
-                    submitBtn.textContent = originalText;
-                    submitBtn.disabled = false;
+                    const studentSession = {
+                        isLoggedIn: true,
+                        studentName: email.split('@')[0],
+                        loginTime: new Date().toISOString()
+                    };
+                    localStorage.setItem('studentSession', JSON.stringify(studentSession));
+                    // Redirect to student dashboard
+                    window.location.href = '../Student/student-dashboard.html';
                 }
             }, 1500);
         });
@@ -123,3 +137,4 @@ document.addEventListener('DOMContentLoaded', function () {
         document.body.style.opacity = '1';
     }, 100);
 });
+
