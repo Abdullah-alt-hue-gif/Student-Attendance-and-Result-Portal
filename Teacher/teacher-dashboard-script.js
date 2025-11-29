@@ -1,284 +1,387 @@
-// teacher-dashboard-script.js
+// ========================================
+// Shared Data Manager (Synced with Admin)
+// ========================================
 
-// Global variables
-let teacherData = {};
-let teacherCourses = [];
-let todayClasses = [];
-let pendingTasks = [];
+class DataManager {
+    constructor() {
+        // No initialization needed - we use admin's data directly
+    }
 
-// Initialize dashboard
-document.addEventListener('DOMContentLoaded', function () {
-    checkTeacherSession();
-    loadTeacherDashboard();
-});
+    // Get current teacher's information
+    getCurrentTeacher() {
+        const session = JSON.parse(localStorage.getItem('teacherSession') || '{}');
+        if (session.teacherName) {
+            const users = this.getUsers();
+            return users.find(u => u.name === session.teacherName && u.role === 'Teacher');
+        }
+        return null;
+    }
 
-// Check if user is logged in as teacher
+    // Users CRUD (shared with admin)
+    getUsers() {
+        return JSON.parse(localStorage.getItem('users')) || [];
+    }
+
+    // Courses CRUD (shared with admin)
+    getCourses() {
+        return JSON.parse(localStorage.getItem('courses')) || [];
+    }
+
+    // Get courses for current teacher
+    getTeacherCourses() {
+        const teacher = this.getCurrentTeacher();
+        if (!teacher) return [];
+
+        const courses = this.getCourses();
+        return courses.filter(c => c.teacher === teacher.name);
+    }
+
+    // Get students enrolled in teacher's courses
+    getTeacherStudents() {
+        const teacherCourses = this.getTeacherCourses();
+        const courseNames = teacherCourses.map(c => c.name);
+
+        // In a real system, we'd have enrollment data
+        // For now, return all students
+        const users = this.getUsers();
+        return users.filter(u => u.role === 'Student');
+    }
+
+    // Tasks Management
+    getTasks() {
+        return JSON.parse(localStorage.getItem('teacherTasks') || '[]');
+    }
+
+    addTask(task) {
+        const tasks = this.getTasks();
+        task.id = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
+        task.createdAt = new Date().toISOString();
+        tasks.push(task);
+        localStorage.setItem('teacherTasks', JSON.stringify(tasks));
+        return task;
+    }
+
+    updateTask(id, updatedData) {
+        const tasks = this.getTasks();
+        const index = tasks.findIndex(t => t.id === id);
+        if (index !== -1) {
+            tasks[index] = { ...tasks[index], ...updatedData };
+            localStorage.setItem('teacherTasks', JSON.stringify(tasks));
+            return tasks[index];
+        }
+        return null;
+    }
+
+    deleteTask(id) {
+        const tasks = this.getTasks();
+        const filtered = tasks.filter(t => t.id !== id);
+        localStorage.setItem('teacherTasks', JSON.stringify(filtered));
+    }
+
+    // Attendance Data
+    getAttendanceRecords() {
+        return JSON.parse(localStorage.getItem('attendanceRecords') || '[]');
+    }
+
+    addAttendanceRecord(record) {
+        const records = this.getAttendanceRecords();
+        record.id = records.length > 0 ? Math.max(...records.map(r => r.id)) + 1 : 1;
+        record.markedAt = new Date().toISOString();
+        records.push(record);
+        localStorage.setItem('attendanceRecords', JSON.stringify(records));
+        return record;
+    }
+}
+
+// ========================================
+// Toast Notification System
+// ========================================
+
+function showToast(message, type = 'success') {
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-times-circle',
+        warning: 'fa-exclamation-circle',
+        info: 'fa-info-circle'
+    };
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <div class="toast-icon">
+            <i class="fas ${icons[type] || icons.success}"></i>
+        </div>
+        <div class="toast-content">
+            <div class="toast-message">${message}</div>
+        </div>
+        <button class="toast-close">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+
+    container.appendChild(toast);
+
+    const closeBtn = toast.querySelector('.toast-close');
+    closeBtn.addEventListener('click', () => {
+        toast.classList.add('removing');
+        setTimeout(() => toast.remove(), 300);
+    });
+
+    setTimeout(() => {
+        toast.classList.add('removing');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// ========================================
+// Shared UI Logic
+// ========================================
+
 function checkTeacherSession() {
-    const userRole = localStorage.getItem('userRole') || sessionStorage.getItem('userRole');
-    const userEmail = localStorage.getItem('userEmail') || sessionStorage.getItem('userEmail');
-
-    // Get teacher name from login session (PRIORITY)
-    let teacherName = localStorage.getItem('userName') || sessionStorage.getItem('userName');
-
-    if (!userRole || userRole !== 'teacher') {
-        alert('Please login as a teacher first');
-        window.location.href = 'login.html';
-        return;
-    }
-
-    // Load teacher data from portalUsers
-    const savedUsers = localStorage.getItem('portalUsers');
-    if (savedUsers) {
-        const users = JSON.parse(savedUsers);
-        const teacher = users.find(u => u.email === userEmail && u.role === 'teacher');
-
-        if (teacher) {
-            teacherData = teacher;
-            // Use stored name from login if available, otherwise use name from portalUsers
-            if (!teacherName) {
-                teacherName = teacher.name;
-            }
-        }
-    }
-
-    // If still no name, use email or default
-    if (!teacherName) {
-        teacherName = userEmail ? userEmail.split('@')[0] : 'Teacher';
-    }
-
-    // Update profile with the determined name
-    updateTeacherProfile(teacherName);
-}
-
-// Update teacher profile display
-function updateTeacherProfile(teacherName) {
-    // Update welcome message
-    document.getElementById('welcomeMessage').textContent = `Welcome back, ${teacherName}!`;
-
-    // Update sidebar profile
-    document.getElementById('teacherName').textContent = teacherName;
-
-    // Update avatar with initials
-    const initials = teacherName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-    document.getElementById('teacherAvatar').textContent = initials;
-}
-
-// Load teacher dashboard data
-function loadTeacherDashboard() {
-    // Load courses assigned to this teacher from portalCourses
-    const savedCourses = localStorage.getItem('portalCourses');
-    if (savedCourses) {
-        const allCourses = JSON.parse(savedCourses);
-        // Filter courses assigned to current teacher
-        const teacherEmail = localStorage.getItem('userEmail') || sessionStorage.getItem('userEmail');
-        teacherCourses = allCourses.filter(course =>
-            course.teacherName === teacherData.name ||
-            course.teacherId === teacherData.id
-        );
-
-        // Update statistics
-        updateStatistics();
-
-        // Load today's classes
-        loadTodayClasses();
-
-        // Load pending tasks
-        loadPendingTasks();
-    } else {
-        // No courses yet
-        updateStatistics();
-        loadTodayClasses();
-        loadPendingTasks();
-    }
-}
-
-// Update statistics cards
-function updateStatistics() {
-    // Total courses
-    document.getElementById('totalCourses').textContent = teacherCourses.length;
-
-    // Today's classes (simulate based on courses)
-    const todayClassesCount = Math.min(teacherCourses.length, 2); // Simulate 2 classes per day
-    document.getElementById('todayClasses').textContent = todayClassesCount;
-
-    // Pending tasks
-    const tasksCount = 3; // Will be dynamic
-    document.getElementById('pendingTasks').textContent = tasksCount;
-
-    // Attendance marked percentage
-    const attendancePercentage = teacherCourses.length > 0 ? 87 : 0; // Simulated
-    document.getElementById('attendanceMarked').textContent = `${attendancePercentage}%`;
-}
-
-// Load today's classes
-function loadTodayClasses() {
-    const classesContainer = document.getElementById('todayClassesList');
-
-    if (teacherCourses.length === 0) {
-        classesContainer.innerHTML = `
-            <div class="empty-state">
-                <div class="icon">📚</div>
-                <p>No classes scheduled for today</p>
-            </div>
-        `;
-        return;
-    }
-
-    // Simulate today's classes (take first 2 courses)
-    todayClasses = teacherCourses.slice(0, 2);
-
-    classesContainer.innerHTML = '';
-
-    todayClasses.forEach((course, index) => {
-        const classCard = document.createElement('div');
-        classCard.className = 'class-card';
-
-        // Generate time slots
-        const timeSlots = [
-            { start: '09:00 AM', end: '10:30 AM', room: 'A-201' },
-            { start: '02:00 PM', end: '03:30 PM', room: 'B-105' }
-        ];
-        const slot = timeSlots[index % timeSlots.length];
-
-        classCard.innerHTML = `
-            <div class="class-header">
-                <div>
-                    <div class="class-title">${course.name}</div>
-                    <div class="student-count">${course.students || 0} Students</div>
-                </div>
-            </div>
-            <div class="class-details">
-                <div class="class-detail">
-                    <span>🕐</span>
-                    <span>${slot.start} - ${slot.end}</span>
-                </div>
-                <div class="class-detail">
-                    <span>📍</span>
-                    <span>Room: ${slot.room}</span>
-                </div>
-            </div>
-            <button class="mark-attendance-btn" onclick="markAttendance('${course.code}')">
-                Mark Attendance
-            </button>
-        `;
-
-        classesContainer.appendChild(classCard);
-    });
-}
-
-// Load pending tasks
-function loadPendingTasks() {
-    const tasksContainer = document.getElementById('pendingTasksList');
-
-    // Sample tasks synchronized with course data
-    pendingTasks = [
-        {
-            title: `Upload Midterm Results for ${teacherCourses[0]?.code || 'CS101'}`,
-            due: '2025-11-20',
-            priority: 'high'
-        },
-        {
-            title: `Mark Attendance for ${teacherCourses[1]?.code || 'Chemistry 102'}`,
-            due: '2025-11-18',
-            priority: 'critical'
-        },
-        {
-            title: 'Review Assignment Submissions',
-            due: '2025-11-22',
-            priority: 'medium'
-        }
-    ];
-
-    if (pendingTasks.length === 0) {
-        tasksContainer.innerHTML = `
-            <div class="empty-state">
-                <div class="icon">✓</div>
-                <p>No pending tasks</p>
-            </div>
-        `;
-        return;
-    }
-
-    tasksContainer.innerHTML = '';
-
-    pendingTasks.forEach(task => {
-        const taskItem = document.createElement('div');
-        taskItem.className = `task-item ${task.priority}`;
-
-        taskItem.innerHTML = `
-            <div class="task-header">
-                <div class="task-title">${task.title}</div>
-                <div class="task-priority ${task.priority}">${task.priority}</div>
-            </div>
-            <div class="task-due">Due: ${formatDate(task.due)}</div>
-        `;
-
-        tasksContainer.appendChild(taskItem);
-    });
-}
-
-// Mark attendance for a course
-function markAttendance(courseCode) {
-    // Navigate to mark attendance page with course parameter
-    window.location.href = `teacher-mark-attendance.html?course=${courseCode}`;
-}
-
-// Navigate to different pages
-function navigateTo(page) {
-    window.location.href = page;
-}
-
-// Toggle notifications
-function toggleNotifications() {
-    const dropdown = document.getElementById('notificationDropdown');
-    dropdown.classList.toggle('show');
-}
-
-// Close notifications when clicking outside
-document.addEventListener('click', function (event) {
-    const dropdown = document.getElementById('notificationDropdown');
-    const btn = document.querySelector('.notification-btn');
-
-    if (dropdown && dropdown.classList.contains('show')) {
-        if (!dropdown.contains(event.target) && !btn.contains(event.target)) {
-            dropdown.classList.remove('show');
-        }
-    }
-});
-
-function markAllRead() {
-    const badges = document.querySelectorAll('.notification-item.unread');
-    badges.forEach(item => item.classList.remove('unread'));
-    document.getElementById('notificationCount').style.display = 'none';
-}
-
-// Logout function
-function logout() {
-    if (confirm('Are you sure you want to logout?')) {
-        localStorage.removeItem('userRole');
-        localStorage.removeItem('userEmail');
-        localStorage.removeItem('userName');
-        sessionStorage.clear();
+    const session = JSON.parse(localStorage.getItem('teacherSession') || '{}');
+    if (!session.isLoggedIn) {
         window.location.href = '../login/teacher-login.html';
+        return false;
+    }
+
+    const teacherNameEl = document.getElementById('teacherName');
+    const welcomeMsg = document.getElementById('welcomeMessage');
+
+    if (teacherNameEl && session.teacherName) {
+        teacherNameEl.textContent = session.teacherName;
+    }
+    if (welcomeMsg && session.teacherName) {
+        welcomeMsg.textContent = `Welcome back, ${session.teacherName}!`;
+    }
+
+    return true;
+}
+
+function setupSidebar() {
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+
+    if (menuToggle && sidebar) {
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+    }
+
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('teacherSession');
+            showToast('Logged out successfully', 'success');
+            setTimeout(() => {
+                window.location.href = '../login/teacher-login.html';
+            }, 1000);
+        });
+    }
+
+    // Highlight active nav item
+    const currentPage = window.location.pathname.split('/').pop();
+    document.querySelectorAll('.nav-item').forEach(item => {
+        const href = item.getAttribute('href');
+        if (href === currentPage) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+}
+
+// ========================================
+// Dashboard Controller
+// ========================================
+
+class DashboardController {
+    constructor() {
+        this.dataManager = new DataManager();
+        this.init();
+    }
+
+    init() {
+        if (!checkTeacherSession()) return;
+        setupSidebar();
+        this.setupEventListeners();
+        this.loadDashboardData();
+        this.initializeSampleTasks();
+    }
+
+    setupEventListeners() {
+        // Quick Actions
+        document.getElementById('markAttendanceAction')?.addEventListener('click', () => {
+            window.location.href = 'teacher-mark-attendance.html';
+        });
+
+        document.getElementById('uploadResultsAction')?.addEventListener('click', () => {
+            window.location.href = 'teacher-upload-results.html';
+        });
+
+        document.getElementById('viewHistoryAction')?.addEventListener('click', () => {
+            window.location.href = 'teacher-attendance-history.html';
+        });
+
+        // Notification Dropdown
+        const notifIcon = document.querySelector('.notification-icon');
+        const notifDropdown = document.getElementById('notificationDropdown');
+
+        if (notifIcon && notifDropdown) {
+            notifIcon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                notifDropdown.classList.toggle('show');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!notifDropdown.contains(e.target) && !notifIcon.contains(e.target)) {
+                    notifDropdown.classList.remove('show');
+                }
+            });
+        }
+    }
+
+    initializeSampleTasks() {
+        const tasks = this.dataManager.getTasks();
+        if (tasks.length === 0) {
+            // Create sample tasks
+            this.dataManager.addTask({
+                title: 'Upload Midterm Results for CS101',
+                dueDate: '2025-11-20',
+                priority: 'HIGH',
+                status: 'pending'
+            });
+            this.dataManager.addTask({
+                title: 'Mark Attendance for Chemistry 102',
+                dueDate: '2025-11-18',
+                priority: 'CRITICAL',
+                status: 'pending'
+            });
+            this.dataManager.addTask({
+                title: 'Review Assignment Submissions',
+                dueDate: '2025-11-22',
+                priority: 'MEDIUM',
+                status: 'pending'
+            });
+        }
+    }
+
+    loadDashboardData() {
+        // Load Stats
+        const teacherCourses = this.dataManager.getTeacherCourses();
+        const todaysClasses = this.getTodaysClasses(teacherCourses);
+        const tasks = this.dataManager.getTasks().filter(t => t.status === 'pending');
+
+        document.getElementById('myCourses').textContent = teacherCourses.length;
+        document.getElementById('todaysClasses').textContent = todaysClasses.length;
+        document.getElementById('pendingTasks').textContent = tasks.length;
+        document.getElementById('attendanceMarked').textContent = '87%';
+
+        // Load Today's Classes
+        this.renderTodaysClasses(todaysClasses);
+
+        // Load Pending Tasks
+        this.renderPendingTasks(tasks);
+
+        // Update notification count
+        document.getElementById('notificationCount').textContent = tasks.length;
+    }
+
+    getTodaysClasses(courses) {
+        // If teacher has no courses assigned, show first 2 courses from all courses
+        let classesToShow = courses;
+
+        if (classesToShow.length === 0) {
+            const allCourses = this.dataManager.getCourses();
+            classesToShow = allCourses.slice(0, 2);
+            console.log('Teacher has no assigned courses, showing first 2 from all courses');
+        }
+
+        // Ensure we have at least 1 class to show
+        if (classesToShow.length === 0) {
+            return [];
+        }
+
+        // Return up to 2 classes with time and room info
+        return classesToShow.slice(0, 2).map((course, index) => ({
+            ...course,
+            time: index === 0 ? '09:00 AM - 10:30 AM' : '02:00 PM - 03:30 PM',
+            room: index === 0 ? 'A-201' : 'B-105'
+        }));
+    }
+
+    renderTodaysClasses(classes) {
+        const container = document.getElementById('todaysClassesList');
+        if (!container) return;
+
+        if (classes.length === 0) {
+            container.innerHTML = '<div class="empty-state">No classes scheduled for today</div>';
+            return;
+        }
+
+        container.innerHTML = classes.map(cls => `
+            <div class="class-item">
+                <div class="class-header">
+                    <h4>${cls.name}</h4>
+                    <span class="student-count">${cls.students || 0} Students</span>
+                </div>
+                <div class="class-details">
+                    <span><i class="fas fa-clock"></i> ${cls.time}</span>
+                    <span><i class="fas fa-map-marker-alt"></i> Room: ${cls.room}</span>
+                </div>
+                <button class="btn-primary btn-block" onclick="markAttendance('${cls.id}')">
+                    Mark Attendance
+                </button>
+            </div>
+        `).join('');
+    }
+
+    renderPendingTasks(tasks) {
+        const container = document.getElementById('pendingTasksList');
+        if (!container) return;
+
+        if (tasks.length === 0) {
+            container.innerHTML = '<div class="empty-state">No pending tasks</div>';
+            return;
+        }
+
+        const priorityColors = {
+            'CRITICAL': 'critical',
+            'HIGH': 'high',
+            'MEDIUM': 'medium',
+            'LOW': 'low'
+        };
+
+        container.innerHTML = tasks.map(task => `
+            <div class="task-item">
+                <div class="task-indicator ${priorityColors[task.priority] || 'medium'}"></div>
+                <div class="task-content">
+                    <h4>${task.title}</h4>
+                    <div class="task-meta">
+                        <span>Due: ${task.dueDate}</span>
+                    </div>
+                </div>
+                <span class="task-badge ${priorityColors[task.priority] || 'medium'}">${task.priority}</span>
+            </div>
+        `).join('');
     }
 }
 
-// Utility function to format dates
-function formatDate(dateString) {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
+// Global function for Mark Attendance button
+function markAttendance(courseId) {
+    window.location.href = `teacher-mark-attendance.html?courseId=${courseId}`;
 }
 
-// Auto-refresh dashboard data every 5 minutes
-setInterval(() => {
-    loadTeacherDashboard();
-}, 300000);
-
-// Listen for storage changes from admin portal
-window.addEventListener('storage', function (e) {
-    if (e.key === 'portalCourses' || e.key === 'portalUsers') {
-        // Reload dashboard when admin makes changes
-        console.log('Data updated by admin, refreshing...');
-        loadTeacherDashboard();
-    }
+// Initialize Dashboard
+let dashboard;
+document.addEventListener('DOMContentLoaded', () => {
+    dashboard = new DashboardController();
 });
