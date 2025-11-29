@@ -4,142 +4,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Portal - Attendance History</title>
+    <title>Attendance History - Teacher Portal</title>
     <link rel="stylesheet" href="teacher-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
-    <div class="teacher-container">
-        <!-- Sidebar -->
-        <nav class="sidebar">
-            <div class="sidebar-header">
-                <h2>Teacher Portal</h2>
-            </div>
-            <ul class="sidebar-menu">
-                <li class="menu-item">
-                    <a href="teacher-dashboard.html">
-                        <span class="icon">📊</span>
-                        Dashboard
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="teacher-mark-attendance.html">
-                        <span class="icon">📝</span>
-                        Mark Attendance
-                    </a>
-                </li>
-                <li class="menu-item active">
-                    <a href="teacher-attendance-history.html">
-                        <span class="icon">🕐</span>
-                        Attendance History
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="teacher-upload-results.html">
-                        <span class="icon">📤</span>
-                        Upload Results
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="teacher-settings.html">
-                        <span class="icon">⚙️</span>
-                        Settings
-                    </a>
-                </li>
-            </ul>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Teacher Portal</h2>
+        </div>
 
-            <!-- User Profile Section -->
+        <nav class="sidebar-nav">
+            <a href="teacher-dashboard.html" class="nav-item">
+                <i class="fas fa-th-large"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="teacher-mark-attendance.html" class="nav-item">
+                <i class="fas fa-clipboard-check"></i>
+                <span>Mark Attendance</span>
+            </a>
+            <a href="teacher-attendance-history.html" class="nav-item active">
+                <i class="fas fa-history"></i>
+                <span>Attendance History</span>
+            </a>
+            <a href="teacher-upload-results.html" class="nav-item">
+                <i class="fas fa-upload"></i>
+                <span>Upload Results</span>
+            </a>
+            <a href="teacher-settings.html" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
             <div class="user-profile">
-                <div class="user-avatar" id="teacherAvatar">TR</div>
+                <div class="user-avatar">TR</div>
                 <div class="user-info">
-                    <div class="user-name" id="teacherName">Teacher</div>
+                    <div class="user-name" id="teacherName">John Smith</div>
                     <div class="user-role">Teacher</div>
                 </div>
             </div>
-        </nav>
+        </div>
+    </div>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Header -->
-            <header class="content-header">
-                <h1>Attendance History</h1>
-                <div class="header-actions">
-                    <div class="notification-wrapper">
-                        <button class="notification-btn" onclick="toggleNotifications()">
-                            🔔
-                            <span class="notification-badge" id="notificationCount">3</span>
-                        </button>
-                        <div class="notification-dropdown" id="notificationDropdown">
-                            <div class="notification-header">
-                                <h4>Notifications</h4>
-                                <span class="mark-read" onclick="markAllRead()">Mark all as read</span>
-                            </div>
-                            <div class="notification-list">
-                                <div class="notification-item unread">
-                                    <div class="notif-icon">📝</div>
-                                    <div class="notif-content">
-                                        <p class="notif-text">New assignment submission from <strong>Sarah
-                                                Johnson</strong></p>
-                                        <span class="notif-time">2 mins ago</span>
-                                    </div>
-                                </div>
-                                <div class="notification-item unread">
-                                    <div class="notif-icon">⚠️</div>
-                                    <div class="notif-content">
-                                        <p class="notif-text">Low attendance alert for <strong>CS101</strong></p>
-                                        <span class="notif-time">1 hour ago</span>
-                                    </div>
-                                </div>
-                                <div class="notification-item">
-                                    <div class="notif-icon">📅</div>
-                                    <div class="notif-content">
-                                        <p class="notif-text">Upcoming deadline: <strong>Midterm Project</strong></p>
-                                        <span class="notif-time">3 hours ago</span>
-                                    </div>
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title">Attendance History</h1>
+            </div>
+            <div class="header-right">
+                <div class="notification-icon">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationCount">3</span>
+                    <div class="notification-dropdown" id="notificationDropdown">
+                        <div class="notification-header">
+                            <h3>Notifications</h3>
+                            <a href="#" class="mark-read">Mark all as read</a>
+                        </div>
+                        <div class="notification-list">
+                            <div class="notification-item unread">
+                                <div class="notif-icon bg-blue"><i class="fas fa-info-circle"></i></div>
+                                <div class="notif-content">
+                                    <p>New course assigned: Web Development</p>
+                                    <span class="notif-time">2 hours ago</span>
                                 </div>
                             </div>
-                            <div class="notification-footer">
-                                <a href="#">View All Notifications</a>
+                            <div class="notification-item unread">
+                                <div class="notif-icon bg-green"><i class="fas fa-check"></i></div>
+                                <div class="notif-content">
+                                    <p>Attendance report generated successfully</p>
+                                    <span class="notif-time">5 hours ago</span>
+                                </div>
+                            </div>
+                            <div class="notification-item">
+                                <div class="notif-icon bg-orange"><i class="fas fa-exclamation-triangle"></i></div>
+                                <div class="notif-content">
+                                    <p>Pending grades submission for CS101</p>
+                                    <span class="notif-time">1 day ago</span>
+                                </div>
                             </div>
                         </div>
+                        <div class="notification-footer">
+                            <a href="#">View all notifications</a>
+                        </div>
                     </div>
-                    <button class="logout-btn" onclick="logout()">
-                        <span>🚪</span>
-                        Logout
-                    </button>
                 </div>
-            </header>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </header>
 
-            <!-- History Card -->
-            <div class="history-card">
-                <div class="history-header">
-                    <div class="history-title">
+        <!-- History Content -->
+        <div class="page" id="historyPage">
+            <!-- Records Card -->
+            <div class="card">
+                <div class="card-header-flex">
+                    <div class="header-text">
                         <h3>Attendance Records</h3>
-                        <p>View and download past attendance records</p>
+                        <p class="subtitle">View and download past attendance records</p>
                     </div>
-                    <button class="export-btn" onclick="exportRecords()">
-                        <span>📥</span> Export Records
+                    <button class="btn-primary" id="exportBtn">
+                        <i class="fas fa-download"></i> Export Records
                     </button>
                 </div>
 
-                <!-- Filters -->
                 <div class="filters-container">
                     <div class="filter-group">
-                        <label>Filter by Course</label>
-                        <select id="courseFilter" onchange="filterRecords()">
-                            <option value="">All Courses</option>
+                        <label for="courseFilter">Filter by Course</label>
+                        <select id="courseFilter" class="form-select">
+                            <option value="all">All Courses</option>
                             <!-- Options populated dynamically -->
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label>Search by Date</label>
-                        <input type="date" id="dateFilter" onchange="filterRecords()">
+                        <label for="dateFilter">Search by Date</label>
+                        <input type="date" id="dateFilter" class="form-input">
                     </div>
                 </div>
 
-                <!-- Table -->
-                <div class="history-table-container">
-                    <table class="history-table">
+                <div class="table-responsive">
+                    <table class="data-table">
                         <thead>
                             <tr>
                                 <th>Date</th>
@@ -150,51 +144,58 @@
                                 <th>Action</th>
                             </tr>
                         </thead>
-                        <tbody id="historyTableBody">
+                        <tbody id="attendanceTableBody">
                             <!-- Rows populated dynamically -->
                         </tbody>
                     </table>
-                </div>
-
-                <div class="pagination-info" id="paginationInfo">
-                    Showing 0 records
-                </div>
-            </div>
-
-            <!-- Bottom Stats -->
-            <div class="bottom-stats">
-                <div class="bottom-stat-card">
-                    <div class="bottom-stat-info">
-                        <h4>Average Attendance</h4>
-                        <div class="value" id="avgAttendance">0%</div>
-                        <div class="trend positive" id="avgTrend">+0% from last month</div>
-                    </div>
-                    <div class="bottom-stat-icon green">
-                        📅
-                    </div>
-                </div>
-                <div class="bottom-stat-card">
-                    <div class="bottom-stat-info">
-                        <h4>Classes Conducted</h4>
-                        <div class="value" id="classesConducted">0</div>
-                        <div class="trend neutral">This month</div>
-                    </div>
-                    <div class="bottom-stat-icon blue">
-                        📅
-                    </div>
-                </div>
-                <div class="bottom-stat-card">
-                    <div class="bottom-stat-info">
-                        <h4>Low Attendance Alerts</h4>
-                        <div class="value" id="lowAttendanceAlerts">0</div>
-                        <div class="trend negative">Requires attention</div>
-                    </div>
-                    <div class="bottom-stat-icon red">
-                        📅
+                    <div class="table-footer" id="tableFooter">
+                        Showing <span id="showingCount">0</span> records
                     </div>
                 </div>
             </div>
-        </main>
+
+            <!-- Bottom Stats Cards -->
+            <div class="history-stats-grid">
+                <div class="stat-card-simple">
+                    <div class="stat-info">
+                        <div class="stat-label">Average Attendance</div>
+                        <div class="stat-value" id="avgAttendance">0%</div>
+                        <div class="stat-trend positive" id="avgTrend">
+                            <i class="fas fa-arrow-up"></i> <span>0% from last month</span>
+                        </div>
+                    </div>
+                    <div class="stat-icon-box green-light">
+                        <i class="far fa-calendar-check"></i>
+                    </div>
+                </div>
+
+                <div class="stat-card-simple">
+                    <div class="stat-info">
+                        <div class="stat-label">Classes Conducted</div>
+                        <div class="stat-value" id="classesConducted">0</div>
+                        <div class="stat-trend neutral">
+                            <span>This month</span>
+                        </div>
+                    </div>
+                    <div class="stat-icon-box blue-light">
+                        <i class="far fa-calendar-alt"></i>
+                    </div>
+                </div>
+
+                <div class="stat-card-simple">
+                    <div class="stat-info">
+                        <div class="stat-label">Low Attendance Alerts</div>
+                        <div class="stat-value" id="lowAttendance">0</div>
+                        <div class="stat-trend negative">
+                            <span>Requires attention</span>
+                        </div>
+                    </div>
+                    <div class="stat-icon-box red-light">
+                        <i class="far fa-calendar-times"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="teacher-attendance-history-script.js"></script>
