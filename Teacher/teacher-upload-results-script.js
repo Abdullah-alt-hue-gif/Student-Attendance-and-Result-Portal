@@ -1,464 +1,397 @@
-// teacher-upload-results-script.js
+// ========================================
+// Shared Data Manager (Synced with Admin)
+// ========================================
 
-// Global variables
-let teacherData = {};
-let teacherCourses = [];
-let students = [];
-let selectedCourse = null;
-let resultsData = [];
-
-// Initialize page
-document.addEventListener('DOMContentLoaded', function () {
-    checkTeacherSession();
-    loadTeacherCourses();
-});
-
-// Check if user is logged in as teacher
-function checkTeacherSession() {
-    const userRole = localStorage.getItem('userRole') || sessionStorage.getItem('userRole');
-    const userEmail = localStorage.getItem('userEmail') || sessionStorage.getItem('userEmail');
-    let teacherName = localStorage.getItem('userName') || sessionStorage.getItem('userName');
-
-    if (!userRole || userRole !== 'teacher') {
-        alert('Please login as a teacher first');
-        window.location.href = 'teacher-login.html';
-        return;
+class DataManager {
+    constructor() {
+        // No initialization needed - we use admin's data directly
     }
 
-    // Load teacher data
-    const savedUsers = localStorage.getItem('portalUsers');
-    if (savedUsers) {
-        const users = JSON.parse(savedUsers);
-        const teacher = users.find(u => u.email === userEmail && u.role === 'teacher');
-        if (teacher) {
-            teacherData = teacher;
-            if (!teacherName) {
-                teacherName = teacher.name;
-            }
+    // Get current teacher's information
+    getCurrentTeacher() {
+        const session = JSON.parse(localStorage.getItem('teacherSession') || '{}');
+        if (session.teacherName) {
+            const users = this.getUsers();
+            return users.find(u => u.name === session.teacherName && u.role === 'Teacher');
         }
+        return null;
     }
 
-    if (!teacherName) {
-        teacherName = userEmail ? userEmail.split('@')[0] : 'Teacher';
+    // Users CRUD (shared with admin)
+    getUsers() {
+        return JSON.parse(localStorage.getItem('users')) || [];
     }
 
-    // Update profile display
-    document.getElementById('teacherName').textContent = teacherName;
-    const initials = teacherName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-    document.getElementById('teacherAvatar').textContent = initials;
-}
+    // Courses CRUD (shared with admin)
+    getCourses() {
+        return JSON.parse(localStorage.getItem('courses')) || [];
+    }
 
-// Load teacher courses
-function loadTeacherCourses() {
-    const savedCourses = localStorage.getItem('portalCourses');
-    const courseSelect = document.getElementById('courseSelect');
+    // Get courses for current teacher
+    getTeacherCourses() {
+        const teacher = this.getCurrentTeacher();
+        if (!teacher) {
+            return this.getCourses();
+        }
+        const courses = this.getCourses();
+        return courses.filter(c => c.teacher === teacher.name);
+    }
 
-    if (savedCourses) {
-        const allCourses = JSON.parse(savedCourses);
+    // Get students (all students for now)
+    getStudents() {
+        const users = this.getUsers();
+        return users.filter(u => u.role === 'Student');
+    }
 
-        // Filter courses assigned to this teacher
-        teacherCourses = allCourses.filter(course =>
-            course.teacherName === teacherData.name ||
-            course.teacherId === teacherData.id
+    // Results CRUD
+    getResults() {
+        return JSON.parse(localStorage.getItem('examResults') || '[]');
+    }
+
+    saveResult(result) {
+        const results = this.getResults();
+        // Check if result already exists for this course, exam, and student
+        const existingIndex = results.findIndex(r =>
+            r.courseId == result.courseId &&
+            r.examType === result.examType &&
+            r.studentId == result.studentId
         );
 
-        // Populate course dropdown
-        courseSelect.innerHTML = '<option value="">-- Select a course --</option>';
-        teacherCourses.forEach(course => {
-            const option = document.createElement('option');
-            option.value = course.code;
-            option.textContent = course.name;
-            courseSelect.appendChild(option);
+        if (existingIndex >= 0) {
+            results[existingIndex] = result;
+        } else {
+            result.id = Date.now() + Math.random();
+            results.push(result);
+        }
+
+        localStorage.setItem('examResults', JSON.stringify(results));
+    }
+}
+
+// ========================================
+// Shared UI Logic
+// ========================================
+
+function checkTeacherSession() {
+    const session = JSON.parse(localStorage.getItem('teacherSession') || '{}');
+    if (!session.isLoggedIn) {
+        window.location.href = '../login/teacher-login.html';
+        return false;
+    }
+
+    const teacherNameEl = document.getElementById('teacherName');
+    if (teacherNameEl && session.teacherName) {
+        teacherNameEl.textContent = session.teacherName;
+    }
+
+    return true;
+}
+
+function setupSidebar() {
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+
+    if (menuToggle && sidebar) {
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+    }
+
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('teacherSession');
+            window.location.href = '../login/teacher-login.html';
+        });
+    }
+
+    // Notification Dropdown
+    const notifIcon = document.querySelector('.notification-icon');
+    const notifDropdown = document.getElementById('notificationDropdown');
+
+    if (notifIcon && notifDropdown) {
+        notifIcon.addEventListener('click', (e) => {
+            e.stopPropagation();
+            notifDropdown.classList.toggle('show');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!notifDropdown.contains(e.target) && !notifIcon.contains(e.target)) {
+                notifDropdown.classList.remove('show');
+            }
         });
     }
 }
 
-// Load students for the selected course
-function loadStudentsForResults() {
-    const courseCode = document.getElementById('courseSelect').value;
-    const marksSection = document.getElementById('marksSection');
-
-    if (!courseCode) {
-        marksSection.style.display = 'none';
-        return;
+function showToast(message, type = 'success') {
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
     }
 
-    selectedCourse = teacherCourses.find(c => c.code === courseCode);
-
-    // Load all students from portalUsers
-    const savedUsers = localStorage.getItem('portalUsers');
-    if (savedUsers) {
-        const allUsers = JSON.parse(savedUsers);
-
-        // Filter students for this course
-        students = allUsers.filter(user =>
-            user.role === 'student' && user.course === courseCode
-        ).sort((a, b) => {
-            const rollA = a.rollNo || '';
-            const rollB = b.rollNo || '';
-            return rollA.localeCompare(rollB);
-        });
-
-        if (students.length === 0) {
-            alert('No students enrolled in this course');
-            marksSection.style.display = 'none';
-            return;
-        }
-
-        // Show marks section and render table
-        marksSection.style.display = 'block';
-        renderMarksTable();
-    }
-}
-
-// Render marks input table
-function renderMarksTable() {
-    const tableBody = document.getElementById('marksTableBody');
-    const totalMarks = document.getElementById('totalMarks').value || 100;
-
-    tableBody.innerHTML = '';
-
-    students.forEach(student => {
-        const row = document.createElement('tr');
-
-        row.innerHTML = `
-            <td>${student.rollNo || 'N/A'}</td>
-            <td>${student.name}</td>
-            <td>
-                <input 
-                    type="number" 
-                    class="marks-input" 
-                    data-student-id="${student.id}"
-                    min="0" 
-                    max="${totalMarks}"
-                    placeholder="0"
-                    oninput="calculateLiveStats()"
-                >
-            </td>
-            <td>${totalMarks}</td>
-            <td class="percentage-cell" data-student-id="${student.id}">0%</td>
-        `;
-
-        tableBody.appendChild(row);
-    });
-
-    // Reset stats
-    calculateLiveStats();
-}
-
-// Calculate live statistics as user enters marks
-function calculateLiveStats() {
-    const totalMarks = parseFloat(document.getElementById('totalMarks').value) || 100;
-    const marksInputs = document.querySelectorAll('.marks-input');
-
-    let validMarks = [];
-
-    marksInputs.forEach(input => {
-        const studentId = input.getAttribute('data-student-id');
-        const marksObtained = parseFloat(input.value) || 0;
-        const percentage = totalMarks > 0 ? Math.round((marksObtained / totalMarks) * 100) : 0;
-
-        // Update percentage cell
-        const percentageCell = document.querySelector(`.percentage-cell[data-student-id="${studentId}"]`);
-        if (percentageCell) {
-            percentageCell.textContent = `${percentage}%`;
-        }
-
-        if (input.value !== '') {
-            validMarks.push(marksObtained);
-        }
-    });
-
-    // Calculate stats
-    if (validMarks.length > 0) {
-        const average = Math.round(validMarks.reduce((a, b) => a + b, 0) / validMarks.length);
-        const highest = Math.max(...validMarks);
-        const lowest = Math.min(...validMarks);
-
-        document.getElementById('liveAverage').textContent = average;
-        document.getElementById('liveHighest').textContent = highest;
-        document.getElementById('liveLowest').textContent = lowest;
-    } else {
-        document.getElementById('liveAverage').textContent = '0';
-        document.getElementById('liveHighest').textContent = '0';
-        document.getElementById('liveLowest').textContent = '0';
-    }
-}
-
-// Update percentages when total marks change
-function updatePercentages() {
-    const totalMarks = parseFloat(document.getElementById('totalMarks').value) || 100;
-
-    // Update table header
-    const totalMarksCells = document.querySelectorAll('.marks-table tbody td:nth-child(4)');
-    totalMarksCells.forEach(cell => {
-        cell.textContent = totalMarks;
-    });
-
-    // Update max attribute for inputs
-    const marksInputs = document.querySelectorAll('.marks-input');
-    marksInputs.forEach(input => {
-        input.setAttribute('max', totalMarks);
-    });
-
-    // Recalculate percentages
-    calculateLiveStats();
-}
-
-// Calculate and preview results
-function calculateAndPreview() {
-    const courseCode = document.getElementById('courseSelect').value;
-    const assessmentType = document.getElementById('assessmentType').value;
-    const totalMarks = parseFloat(document.getElementById('totalMarks').value) || 100;
-
-    if (!courseCode) {
-        alert('Please select a course');
-        return;
-    }
-
-    // Collect results data
-    resultsData = [];
-    const marksInputs = document.querySelectorAll('.marks-input');
-
-    let hasEmptyFields = false;
-
-    marksInputs.forEach(input => {
-        if (input.value === '') {
-            hasEmptyFields = true;
-        }
-
-        const studentId = input.getAttribute('data-student-id');
-        const student = students.find(s => s.id === studentId);
-        const marksObtained = parseFloat(input.value) || 0;
-        const percentage = totalMarks > 0 ? Math.round((marksObtained / totalMarks) * 100) : 0;
-        const grade = calculateGrade(percentage);
-        const status = percentage >= 50 ? 'Passed' : 'Failed';
-
-        resultsData.push({
-            studentId: studentId,
-            rollNo: student.rollNo,
-            name: student.name,
-            marksObtained: marksObtained,
-            totalMarks: totalMarks,
-            percentage: percentage,
-            grade: grade,
-            status: status
-        });
-    });
-
-    if (hasEmptyFields) {
-        if (!confirm('Some students have no marks entered (they will get 0). Continue?')) {
-            return;
-        }
-    }
-
-    // Calculate summary stats
-    const percentages = resultsData.map(r => r.percentage);
-    const average = Math.round(percentages.reduce((a, b) => a + b, 0) / percentages.length);
-    const highest = Math.max(...resultsData.map(r => r.marksObtained));
-    const lowest = Math.min(...resultsData.map(r => r.marksObtained));
-    const passCount = resultsData.filter(r => r.status === 'Passed').length;
-    const passRate = Math.round((passCount / resultsData.length) * 100);
-
-    // Update preview stats
-    document.getElementById('previewAverage').textContent = `${average}%`;
-    document.getElementById('previewHighest').textContent = highest;
-    document.getElementById('previewLowest').textContent = lowest;
-    document.getElementById('previewPassRate').textContent = `${passRate}%`;
-
-    // Render preview table
-    renderPreviewTable();
-
-    // Switch to preview mode
-    document.getElementById('editMode').style.display = 'none';
-    document.getElementById('previewMode').style.display = 'block';
-}
-
-// Calculate grade based on percentage
-function calculateGrade(percentage) {
-    if (percentage >= 95) return 'A+';
-    if (percentage >= 90) return 'A';
-    if (percentage >= 85) return 'A-';
-    if (percentage >= 80) return 'B+';
-    if (percentage >= 75) return 'B';
-    if (percentage >= 70) return 'B-';
-    if (percentage >= 65) return 'C+';
-    if (percentage >= 60) return 'C';
-    if (percentage >= 55) return 'C-';
-    if (percentage >= 50) return 'D';
-    return 'F';
-}
-
-// Render preview table
-function renderPreviewTable() {
-    const tableBody = document.getElementById('resultsTableBody');
-    tableBody.innerHTML = '';
-
-    resultsData.forEach(result => {
-        const row = document.createElement('tr');
-
-        // Determine grade badge class
-        let gradeBadgeClass = 'grade-badge';
-        if (result.grade.includes('A')) gradeBadgeClass += ' grade-a';
-        else if (result.grade.includes('B')) gradeBadgeClass += ' grade-b';
-        else if (result.grade.includes('C')) gradeBadgeClass += ' grade-c';
-        else if (result.grade.includes('D')) gradeBadgeClass += ' grade-d';
-        else gradeBadgeClass += ' grade-f';
-
-        // Determine status badge class
-        const statusBadgeClass = result.status === 'Passed' ? 'status-badge status-passed' : 'status-badge status-failed';
-
-        row.innerHTML = `
-            <td>${result.rollNo || 'N/A'}</td>
-            <td>${result.name}</td>
-            <td>${result.marksObtained}/${result.totalMarks}</td>
-            <td>${result.percentage}%</td>
-            <td><span class="${gradeBadgeClass}">${result.grade}</span></td>
-            <td><span class="${statusBadgeClass}">${result.status}</span></td>
-        `;
-
-        tableBody.appendChild(row);
-    });
-}
-
-// Back to edit mode
-function backToEdit() {
-    document.getElementById('editMode').style.display = 'block';
-    document.getElementById('previewMode').style.display = 'none';
-}
-
-// Publish results
-function publishResults() {
-    const courseCode = document.getElementById('courseSelect').value;
-    const courseName = selectedCourse.name;
-    const assessmentType = document.getElementById('assessmentType').value;
-
-    // Load existing exam results
-    const savedResults = localStorage.getItem('examResults');
-    let examResults = savedResults ? JSON.parse(savedResults) : [];
-
-    // Create result record
-    const resultRecord = {
-        id: Date.now().toString(),
-        courseCode: courseCode,
-        courseName: courseName,
-        assessmentType: assessmentType,
-        publishedBy: teacherData.name || 'Teacher',
-        publishedAt: new Date().toISOString(),
-        results: resultsData
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-times-circle',
+        warning: 'fa-exclamation-circle',
+        info: 'fa-info-circle'
     };
 
-    // Add to exam results
-    examResults.push(resultRecord);
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <div class="toast-icon">
+            <i class="fas ${icons[type] || icons.success}"></i>
+        </div>
+        <div class="toast-content">
+            <div class="toast-message">${message}</div>
+        </div>
+        <button class="toast-close">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
 
-    // Save to localStorage
-    localStorage.setItem('examResults', JSON.stringify(examResults));
+    container.appendChild(toast);
 
-    // Show success message
-    showSuccessModal();
+    const closeBtn = toast.querySelector('.toast-close');
+    closeBtn.addEventListener('click', () => {
+        toast.classList.add('removing');
+        setTimeout(() => toast.remove(), 300);
+    });
 
-    // Reset form after a delay
     setTimeout(() => {
-        window.location.reload();
-    }, 2000);
+        toast.classList.add('removing');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 
-// Show success modal
-function showSuccessModal() {
-    // Create modal overlay
-    const overlay = document.createElement('div');
-    overlay.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10000;
-    `;
+// ========================================
+// Results Controller
+// ========================================
 
-    // Create modal content
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-        background: white;
-        padding: 40px;
-        border-radius: 12px;
-        text-align: center;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-        max-width: 400px;
-    `;
-
-    modal.innerHTML = `
-        <div style="font-size: 48px; margin-bottom: 20px;">✅</div>
-        <h2 style="margin: 0 0 10px 0; color: #27ae60;">Published Successfully!</h2>
-        <p style="margin: 0; color: #666;">Results have been published to students.</p>
-    `;
-
-    overlay.appendChild(modal);
-    document.body.appendChild(overlay);
-
-    // Remove modal after 2 seconds
-    setTimeout(() => {
-        document.body.removeChild(overlay);
-    }, 2000);
-}
-
-// Cancel upload
-function cancelUpload() {
-    if (confirm('Are you sure you want to cancel? All entered data will be lost.')) {
-        window.location.href = 'teacher-dashboard.html';
+class ResultsController {
+    constructor() {
+        this.dataManager = new DataManager();
+        this.init();
     }
-}
 
-// Toggle notifications
-function toggleNotifications() {
-    const dropdown = document.getElementById('notificationDropdown');
-    dropdown.classList.toggle('show');
-}
+    init() {
+        if (!checkTeacherSession()) return;
+        setupSidebar();
+        this.loadCourses();
+        this.setupEventListeners();
+    }
 
-// Close notifications when clicking outside
-document.addEventListener('click', function (event) {
-    const dropdown = document.getElementById('notificationDropdown');
-    const btn = document.querySelector('.notification-btn');
+    loadCourses() {
+        const courses = this.dataManager.getTeacherCourses();
+        const courseFilter = document.getElementById('courseFilter');
+        const modalCourseSelect = document.getElementById('modalCourseSelect');
 
-    if (dropdown && dropdown.classList.contains('show')) {
-        if (!dropdown.contains(event.target) && !btn.contains(event.target)) {
-            dropdown.classList.remove('show');
+        const options = courses.map(c => `<option value="${c.id}">${c.name} (${c.code})</option>`).join('');
+
+        if (courseFilter) {
+            courseFilter.innerHTML = '<option value="">Select a course</option>' + options;
+        }
+
+        if (modalCourseSelect) {
+            modalCourseSelect.innerHTML = '<option value="">Select a course</option>' + options;
         }
     }
-});
 
-function markAllRead() {
-    const badges = document.querySelectorAll('.notification-item.unread');
-    badges.forEach(item => item.classList.remove('unread'));
-    document.getElementById('notificationCount').style.display = 'none';
-}
+    setupEventListeners() {
+        // Filter changes
+        document.getElementById('courseFilter')?.addEventListener('change', () => this.loadResults());
+        document.getElementById('examTypeFilter')?.addEventListener('change', () => this.loadResults());
 
-// Logout function
-function logout() {
-    if (confirm('Are you sure you want to logout?')) {
-        localStorage.removeItem('userRole');
-        localStorage.removeItem('userEmail');
-        localStorage.removeItem('userName');
-        sessionStorage.clear();
-        window.location.href = '../login/teacher-login.html';
+        // Modal interactions
+        const modal = document.getElementById('uploadModal');
+        const openBtn = document.getElementById('openUploadModalBtn');
+        const closeBtn = document.getElementById('closeModalBtn');
+        const cancelBtn = document.getElementById('cancelUploadBtn');
+
+        if (openBtn) {
+            openBtn.addEventListener('click', () => {
+                modal.classList.add('show');
+                this.resetModal();
+            });
+        }
+
+        const closeModal = () => modal.classList.remove('show');
+        if (closeBtn) closeBtn.addEventListener('click', closeModal);
+        if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+        // Modal Course Change
+        document.getElementById('modalCourseSelect')?.addEventListener('change', (e) => {
+            this.generateStudentInputs(e.target.value);
+        });
+
+        // Save Results
+        document.getElementById('saveResultsBtn')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.saveResults();
+        });
     }
-}
 
-// Listen for storage changes from admin portal
-window.addEventListener('storage', function (e) {
-    if (e.key === 'portalCourses' || e.key === 'portalUsers') {
-        // Reload courses and students when admin makes changes
-        console.log('Data updated by admin, refreshing...');
-        loadTeacherCourses();
+    loadResults() {
+        const courseId = document.getElementById('courseFilter').value;
+        const examType = document.getElementById('examTypeFilter').value;
+        const tbody = document.getElementById('resultsTableBody');
+        const footer = document.getElementById('tableFooter');
 
-        // Reload students if a course is currently selected
-        const selectedCourseCode = document.getElementById('courseSelect').value;
-        if (selectedCourseCode) {
-            loadStudentsForResults();
+        if (!courseId) {
+            tbody.innerHTML = '';
+            footer.style.display = 'block';
+            footer.textContent = 'Please select a course to view results';
+            return;
+        }
+
+        const allResults = this.dataManager.getResults();
+        const filteredResults = allResults.filter(r => r.courseId == courseId && r.examType === examType);
+
+        if (filteredResults.length === 0) {
+            tbody.innerHTML = '';
+            footer.style.display = 'block';
+            footer.textContent = 'No results found for this selection';
+            return;
+        }
+
+        footer.style.display = 'none';
+        tbody.innerHTML = filteredResults.map(r => {
+            let gradeColor = 'var(--text-dark)';
+            if (r.grade === 'A' || r.grade === 'A+') gradeColor = 'var(--green)';
+            if (r.grade === 'F') gradeColor = 'var(--red)';
+
+            return `
+                <tr>
+                    <td>${r.rollNo}</td>
+                    <td>${r.studentName}</td>
+                    <td>${r.marksObtained}</td>
+                    <td>${r.totalMarks}</td>
+                    <td>${r.percentage}%</td>
+                    <td style="color: ${gradeColor}; font-weight: 600;">${r.grade}</td>
+                    <td>
+                        <button class="btn-icon" title="Edit"><i class="fas fa-edit"></i></button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    generateStudentInputs(courseId) {
+        const container = document.getElementById('studentMarksEntry');
+        if (!courseId) {
+            container.innerHTML = '<div class="empty-state-small"><p>Select a course to enter marks for students</p></div>';
+            return;
+        }
+
+        const students = this.dataManager.getStudents();
+        // In a real app, we would filter students enrolled in this specific course
+        // For now, we use all students as per the simplified data model
+
+        if (students.length === 0) {
+            container.innerHTML = '<div class="empty-state-small"><p>No students found</p></div>';
+            return;
+        }
+
+        container.innerHTML = students.map(student => `
+            <div class="student-mark-row" data-student-id="${student.id}">
+                <div class="student-info-small">
+                    <span class="name">${student.name}</span>
+                    <span class="roll">ID: ${student.id}</span>
+                </div>
+                <input type="number" class="form-input mark-input" placeholder="Marks" min="0" required>
+            </div>
+        `).join('');
+    }
+
+    calculateGrade(percentage) {
+        if (percentage >= 90) return 'A+';
+        if (percentage >= 85) return 'A';
+        if (percentage >= 80) return 'A-';
+        if (percentage >= 75) return 'B+';
+        if (percentage >= 70) return 'B';
+        if (percentage >= 65) return 'B-';
+        if (percentage >= 60) return 'C+';
+        if (percentage >= 55) return 'C';
+        if (percentage >= 50) return 'D';
+        return 'F';
+    }
+
+    saveResults() {
+        const courseSelect = document.getElementById('modalCourseSelect');
+        const examTypeSelect = document.getElementById('modalExamType');
+        const totalMarksInput = document.getElementById('modalTotalMarks');
+
+        if (!courseSelect.value || !totalMarksInput.value) {
+            showToast('Please fill in all required fields', 'error');
+            return;
+        }
+
+        const courseId = courseSelect.value;
+        const courseName = courseSelect.options[courseSelect.selectedIndex].text;
+        const examType = examTypeSelect.value;
+        const totalMarks = parseFloat(totalMarksInput.value);
+
+        const rows = document.querySelectorAll('.student-mark-row');
+        let savedCount = 0;
+
+        rows.forEach(row => {
+            const studentId = row.dataset.studentId;
+            const studentName = row.querySelector('.name').textContent;
+            const marksInput = row.querySelector('.mark-input');
+            const marksObtained = parseFloat(marksInput.value);
+
+            if (!isNaN(marksObtained)) {
+                const percentage = Math.round((marksObtained / totalMarks) * 100);
+                const grade = this.calculateGrade(percentage);
+                const courseCode = courseName.match(/\((.*?)\)/)?.[1] || 'CS';
+                const rollNo = `${courseCode}2025${String(studentId).padStart(3, '0')}`;
+
+                const result = {
+                    courseId,
+                    courseName,
+                    examType,
+                    studentId,
+                    studentName,
+                    rollNo,
+                    marksObtained,
+                    totalMarks,
+                    percentage,
+                    grade,
+                    date: new Date().toISOString()
+                };
+
+                this.dataManager.saveResult(result);
+                savedCount++;
+            }
+        });
+
+        if (savedCount > 0) {
+            showToast(`Results saved for ${savedCount} students`, 'success');
+            document.getElementById('uploadModal').classList.remove('show');
+
+            // If the filter matches the uploaded data, refresh the table
+            const filterCourse = document.getElementById('courseFilter').value;
+            const filterExam = document.getElementById('examTypeFilter').value;
+
+            if (filterCourse == courseId && filterExam == examType) {
+                this.loadResults();
+            }
+        } else {
+            showToast('Please enter marks for at least one student', 'warning');
         }
     }
+
+    resetModal() {
+        document.getElementById('uploadForm').reset();
+        document.getElementById('studentMarksEntry').innerHTML = '<div class="empty-state-small"><p>Select a course to enter marks for students</p></div>';
+    }
+}
+
+// Initialize
+let resultsController;
+document.addEventListener('DOMContentLoaded', () => {
+    resultsController = new ResultsController();
 });
