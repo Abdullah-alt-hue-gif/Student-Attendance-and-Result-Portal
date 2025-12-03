@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Cases Table</title>
+    <style>
+        body {
+            font-family: 'Calibri', 'Segoe UI', sans-serif;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 11pt; /* Standard Word font size */
+        }
+        th, td {
+            border: 1px solid #000; /* Standard black borders for Word */
+            padding: 8px 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background-color: #f2f2f2; /* Light gray header */
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #ffffff;
+        }
+        .status-pass {
+            color: green;
+            font-weight: bold;
+        }
+        .status-fail {
+            color: red;
+            font-weight: bold;
+        }
+        .instructions {
+            background-color: #e8f4fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #b6d4fe;
+            color: #0d6efd;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="instructions">
+        <strong>Instructions:</strong> To use this in Microsoft Word:
+        <ol style="margin-top: 5px; margin-bottom: 0; padding-left: 20px;">
+            <li>Click anywhere in the table below.</li>
+            <li>Press <strong>Ctrl+A</strong> to select the table (or drag to select).</li>
+            <li>Press <strong>Ctrl+C</strong> to copy.</li>
+            <li>Open your Word document and press <strong>Ctrl+V</strong> to paste.</li>
+        </ol>
+    </div>
+
+    <h2>Test Case Validation Table</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 20%;">Test Case</th>
+                <th style="width: 25%;">Steps</th>
+                <th style="width: 20%;">Expected Result</th>
+                <th style="width: 25%;">Actual Result</th>
+                <th style="width: 10%;">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>1. Admin Login (Positive)</strong></td>
+                <td>1. Navigate to Admin Login page.<br>2. Enter Email: <code>admin@school.com</code>, Password: <code>admin123</code>.<br>3. Click "Login".</td>
+                <td>Redirect to Admin Dashboard.</td>
+                <td>Redirected to Admin Dashboard.</td>
+                <td class="status-pass">Pass</td>
+            </tr>
+            <tr>
+                <td><strong>2. Teacher Login (Positive)</strong></td>
+                <td>1. Navigate to Teacher Login page.<br>2. Enter Email: <code>teacher@school.com</code>, Password: <code>teacher123</code>.<br>3. Click "Login".</td>
+                <td>Redirect to Teacher Dashboard.</td>
+                <td>Redirected to Teacher Dashboard.</td>
+                <td class="status-pass">Pass</td>
+            </tr>
+            <tr>
+                <td><strong>3. Student Login (Positive)</strong></td>
+                <td>1. Navigate to Student Login page.<br>2. Enter Email: <code>student@school.com</code>, Password: <code>student123</code>.<br>3. Click "Login".</td>
+                <td>Redirect to Student Dashboard.</td>
+                <td>Redirected to Student Dashboard.</td>
+                <td class="status-pass">Pass</td>
+            </tr>
+            <tr>
+                <td><strong>4. Invalid Login - Wrong Password (Negative)</strong></td>
+                <td>1. Enter valid email (e.g., <code>admin@school.com</code>).<br>2. Enter invalid password.<br>3. Click "Login".</td>
+                <td>Display error message "Invalid email or password".</td>
+                <td>Alert displayed: "Invalid email or password".</td>
+                <td class="status-pass">Pass</td>
+            </tr>
+            <tr>
+                <td><strong>5. Invalid Login - Empty Fields (Negative)</strong></td>
+                <td>1. Leave Email or Password field empty.<br>2. Click "Login".</td>
+                <td>Prevent form submission and show validation error.</td>
+                <td>HTML5 validation prevented submission.</td>
+                <td class="status-pass">Pass</td>
+            </tr>
+            <tr>
+                <td><strong>6. Admin Add User (Positive)</strong></td>
+                <td>1. Admin Dashboard > Users > Add User.<br>2. Fill Name, Email (<code>new@test.com</code>), Role.<br>3. Click "Save User".</td>
+                <td>User added to the list and saved to system.</td>
+                <td>User appeared in table; saved to localStorage.</td>
+                <td class="status-pass">Pass</td>
+            </tr>
+            <tr>
+                <td><strong>7. Admin Add Duplicate User (Negative)</strong></td>
+                <td>1. Admin Dashboard > Users > Add User.<br>2. Enter existing email (<code>student@school.com</code>).<br>3. Click "Save User".</td>
+                <td>Show error that user already exists.</td>
+                <td>Toast error: "User with this email already exists".</td>
+                <td class="status-pass">Pass</td>
+            </tr>
+            <tr>
+                <td><strong>8. Teacher Mark Attendance (Positive)</strong></td>
+                <td>1. Teacher Dashboard > Mark Attendance.<br>2. Select Course & Date.<br>3. Click "Mark All Present" > "Save Attendance".</td>
+                <td>Success message and data saved.</td>
+                <td>Toast success: "Attendance saved successfully!".</td>
+                <td class="status-pass">Pass</td>
+            </tr>
+            <tr>
+                <td><strong>9. Teacher Mark Attendance - No Course (Negative)</strong></td>
+                <td>1. Go to Mark Attendance page.<br>2. Do NOT select a course.<br>3. Click "Save Attendance".</td>
+                <td>Show error message "Please select a course".</td>
+                <td>Toast error: "Please select a course".</td>
+                <td class="status-pass">Pass</td>
+            </tr>
+            <tr>
+                <td><strong>10. Teacher Upload Results (Positive)</strong></td>
+                <td>1. Teacher Dashboard > Upload Results.<br>2. Select Course, Exam, Total Marks.<br>3. Enter marks for students > "Save Results".</td>
+                <td>Success message and results saved.</td>
+                <td>Toast success: "Results saved for X students".</td>
+                <td class="status-pass">Pass</td>
+            </tr>
+            <tr>
+                <td><strong>11. Teacher Upload Results - Missing Data (Negative)</strong></td>
+                <td>1. Open Upload Modal.<br>2. Leave "Total Marks" empty.<br>3. Click "Save Results".</td>
+                <td>Show error message "Please fill in all required fields".</td>
+                <td>Toast error: "Please fill in all required fields".</td>
+                <td class="status-pass">Pass</td>
+            </tr>
+            <tr>
+                <td><strong>12. Student View Attendance (Positive)</strong></td>
+                <td>1. Log in as Student > Click "My Attendance".<br>2. View overall stats and course list.</td>
+                <td>Attendance percentage and details are visible.</td>
+                <td>Correct attendance stats displayed.</td>
+                <td class="status-pass">Pass</td>
+            </tr>
+            <tr>
+                <td><strong>13. Student View Results (Positive)</strong></td>
+                <td>1. Log in as Student > Click "My Results".<br>2. Select a course to view details.</td>
+                <td>Grades, marks, and GPA are displayed.</td>
+                <td>Correct results and GPA displayed.</td>
+                <td class="status-pass">Pass</td>
+            </tr>
+            <tr>
+                <td><strong>14. User Logout (Positive)</strong></td>
+                <td>1. Click "Logout" button on Dashboard.</td>
+                <td>Session ended, redirected to Login page.</td>
+                <td>Redirected to Login; session cleared.</td>
+                <td class="status-pass">Pass</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>
