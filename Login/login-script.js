@@ -44,7 +44,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 console.log('✅ Login successful:', user);
 
-                // Redirect based on role
+                // Validate that user's role matches the expected role for this login page
+                const expectedRole = role.toLowerCase();
+                const actualRole = user.role.toLowerCase();
+
+                if (actualRole !== expectedRole) {
+                    // Clear the token since this is not the correct login page
+                    API.logout();
+                    throw new Error(`Access denied. This is the ${expectedRole} login page. Please use the ${actualRole} login page to access your account.`);
+                }
+
+                // Redirect based on role (only if validation passed)
                 if (user.role === 'admin') {
                     window.location.href = '../Admin/admin-dashboard.html';
                 } else if (user.role === 'teacher') {
