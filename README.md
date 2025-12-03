@@ -324,11 +324,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Authors
 
-<<<<<<< HEAD
-- **Your Name** - *Initial work* - [YourGitHub](https://github.com/yourusername)
-=======
 - **M.Abdullah and Junaid Haider** -
->>>>>>> 52e0762c5c836f074db4c0741053d7aa529413ef
 
 ## 🙏 Acknowledgments
 
