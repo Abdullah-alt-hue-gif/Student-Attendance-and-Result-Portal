@@ -324,7 +324,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Authors
 
+<<<<<<< HEAD
 - **Your Name** - *Initial work* - [YourGitHub](https://github.com/yourusername)
+=======
+- **M.Abdullah and Junaid Haider** -
+>>>>>>> 52e0762c5c836f074db4c0741053d7aa529413ef
 
 ## 🙏 Acknowledgments
 
@@ -336,8 +340,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📧 Contact
 
 For questions or support, please contact:
+<<<<<<< HEAD
 - Email: your.email@example.com
 - GitHub Issues: [Create an issue](https://github.com/yourusername/student-attendance-result-system/issues)
+=======
+- Email: ryomansukuna@gmail.com
+>>>>>>> 52e0762c5c836f074db4c0741053d7aa529413ef
 
 ---
 
