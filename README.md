@@ -336,13 +336,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📧 Contact
 
 For questions or support, please contact:
-<<<<<<< HEAD
-- Email: your.email@example.com
-- GitHub Issues: [Create an issue](https://github.com/yourusername/student-attendance-result-system/issues)
-=======
-- Email: ryomansukuna@gmail.com
->>>>>>> 52e0762c5c836f074db4c0741053d7aa529413ef
 
+- Email: ryomansukuna@gmail.com
 ---
 
 **⭐ If you find this project useful, please consider giving it a star on GitHub!**
