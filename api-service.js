@@ -457,6 +457,16 @@ class APIService {
         const result = await this.request(`/enrollments/student/${student_id}`);
         return result.data;
     }
+
+    /**
+     * Get notifications for a user
+     * @param {number} userId 
+     * @returns {Promise<array>}
+     */
+    async getNotifications(userId) {
+        const result = await this.request(`/notifications/${userId}`);
+        return result.data;
+    }
 }
 
 // Create global API instance
