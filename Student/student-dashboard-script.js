@@ -68,11 +68,12 @@ function updateSidebarInfo(user) {
 
 async function loadDashboardData(studentId) {
     try {
-        // Fetch Results, Attendance, and Enrollments in parallel
-        const [resultsResponse, attendanceResponse, enrollmentsResponse] = await Promise.all([
+        // Fetch Results, Attendance, Enrollments, and Notifications in parallel
+        const [resultsResponse, attendanceResponse, enrollmentsResponse, notificationsResponse] = await Promise.all([
             API.getStudentResults(studentId).catch(() => null),
             API.getAttendanceReport(studentId).catch(() => null),
-            API.getStudentEnrollments(studentId).catch(() => null)
+            API.getStudentEnrollments(studentId).catch(() => null),
+            API.getNotifications(studentId).catch(() => null)
         ]);
 
         // Update CGPA
@@ -93,7 +94,7 @@ async function loadDashboardData(studentId) {
             // Update Donut Chart Conic Gradient
             const chartEl = document.getElementById('attendanceChart');
             if (chartEl) {
-                chartEl.style.background = `conic-gradient(var(--primary-color) ${overallPct * 3.6}deg, #e0e0e0 0deg)`;
+                chartEl.style.background = `conic-gradient(var(--primary-color) ${overallPct * 3.6}deg, #e0e0e0 ${overallPct * 3.6}deg)`;
             }
         } else if (attendanceEl) {
             attendanceEl.textContent = '0%';
@@ -128,6 +129,13 @@ async function loadDashboardData(studentId) {
         // Render Course Attendance List
         if (attendanceResponse && attendanceResponse.data && attendanceResponse.data.courses) {
             renderCourseAttendance(attendanceResponse.data.courses);
+        }
+
+        // Render Notifications
+        if (notificationsResponse && notificationsResponse.length > 0) {
+            renderNotifications(notificationsResponse);
+        } else {
+            renderNotifications([]); // clear or show empty state
         }
 
     } catch (error) {
@@ -230,6 +238,47 @@ function renderResultsList(results) {
         item.style.alignItems = 'center';
         item.style.padding = '12px';
         item.style.borderBottom = '1px solid #eee';
+
+        container.appendChild(item);
+    });
+}
+
+function renderNotifications(notifications) {
+    const container = document.getElementById('notificationList');
+    const badge = document.querySelector('.notification-badge');
+
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    // Update badge count
+    const unreadCount = notifications ? notifications.filter(n => !n.is_read).length : 0;
+    if (badge) {
+        badge.textContent = unreadCount;
+        badge.style.display = unreadCount > 0 ? 'block' : 'none';
+    }
+
+    if (!notifications || notifications.length === 0) {
+        container.innerHTML = '<div class="empty-state-small" style="padding:15px; text-align:center; color:#666;">No notifications</div>';
+        return;
+    }
+
+    // Take last 5 notifications
+    notifications.slice(0, 5).forEach(notification => {
+        const item = document.createElement('div');
+        item.className = `notification-item ${notification.is_read ? 'read' : 'unread'}`;
+        item.style.padding = '10px 15px';
+        item.style.borderBottom = '1px solid #eee';
+        item.style.cursor = 'pointer';
+        if (!notification.is_read) item.style.backgroundColor = '#f0f7ff';
+
+        const date = new Date(notification.created_at).toLocaleDateString();
+
+        item.innerHTML = `
+            <div style="font-weight: 500; margin-bottom: 4px;">${notification.title}</div>
+            <div style="font-size: 0.9em; color: #666;">${notification.message}</div>
+            <div style="font-size: 0.8em; color: #999; margin-top: 4px;">${date}</div>
+        `;
 
         container.appendChild(item);
     });
